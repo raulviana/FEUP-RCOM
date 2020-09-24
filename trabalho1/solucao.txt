@@ -1,0 +1,8 @@
+Solução 1 - Utilização de 1 máquina virtual (Recomendada)
+Use uma máquina Linux (por exemplo Ubuntu). A máquina Linux pode ser uma máquina virtual
+Use o comando "socat" para criar 2 portas série virtuais interligadas entre si.
+sudo socat -d  -d  PTY,link=/dev/ttyS10,mode=777   PTY,link=/dev/ttyS11,mode=777
+e use as portas  ttyS10  e    ttyS11  .
+
+Em terminais diferentes corra o emissor ligado a ttyS10 e  o recetor ligado a ttyS11
+Em fases mais avançadas do trabalho poderá usar um programa simula o cabo série ligado e desligado
