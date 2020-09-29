@@ -10,7 +10,7 @@ gcc receive.c -o receive
 
 gnome-terminal -x sh -c "./receive /dev/ttyS11; bash"
 
-sleep 1.5
+sleep 2
 
 gnome-terminal -x sh -c "./send /dev/ttyS10; bash"
 
