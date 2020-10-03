@@ -6,11 +6,21 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #define BAUDRATE B38400
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 #define FALSE 0
 #define TRUE 1
+
+#define FLAG 0x7E
+#define CONTROL_SET 0x02
+#define CONTROL_DISC 0x0b
+#define CONTROL_UA 0x07
+#define FIELD_A_SC 0x03
+#define FIELD_A_RC 0x01
+#define BCC1 0x00
+#define BCC2 0x00
 
 volatile int STOP=FALSE;
 
@@ -25,6 +35,8 @@ int main(int argc, char** argv)
       printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1\n");
       exit(1);
     }
+
+    printf("-->RECEIVER<--\n");
 
   /*
     Open serial port device for reading and writing and not as controlling tty
@@ -60,28 +72,44 @@ int main(int argc, char** argv)
       exit(-1);
     }
     printf("New termios structure set\n");
+    /********************************************/
    
+
+
     char in_message[255];
+    bzero(in_message, sizeof(in_message));
     int position = 0;
     int count = 0;
 
     while (count < 5) {       /* loop for input */
       res = read(fd,buf,1);   /* returns after 1 chars have been input */
       buf[res] = 0;               /* so we can printf... */
-      printf("%4X: %d\n", buf, res);
       in_message[position++] = buf[0];
 
       count = count + res;
     }
 
-     printf("Message received: %04X\n", in_message, res);
-    exit(1);
-    char out_message[] = "TESTED";
-    int tamanho = strlen(out_message);
-    out_message[tamanho++] = '\0';
+     printf("[MESSAGE RECEIVED]\n");
+    printf("SET: ");
+     for (int i = 0; i < 5; i++){
+       printf("%4X ", in_message[i]);
+     }
+  
+    char UA[5];
+    UA[0] = FLAG;
+    UA[1] = FIELD_A_SC;
+    UA[2] = CONTROL_UA;
+    UA[3] = UA[1] ^ UA[2];
+    UA[4] = FLAG;
 
-    res = write(fd, out_message, tamanho);
-    printf("Message %s sent back with %d bytes\n", out_message, res);
+    res = write(fd, UA, sizeof(UA));
+
+    printf("\n[MESSAGE SENT]\n");
+    printf("UA: ");
+    for (int i = 0; i < 5; i++){  
+      printf("%4X ", UA[i]);
+    }
+    printf("\n");
 
 
     tcsetattr(fd,TCSANOW,&oldtio);

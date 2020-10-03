@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #define BAUDRATE B38400
 #define MODEMDEVICE "/dev/ttyS1"
@@ -20,6 +21,8 @@
 #define CONTROL_UA 0x07
 #define FIELD_A_SC 0x03
 #define FIELD_A_RC 0x01
+#define BCC1 0x00
+#define BCC2 0x00
 
 
 volatile int STOP=FALSE;
@@ -41,8 +44,10 @@ int main(int argc, char** argv)
   printf("-->SENDER<--\n");
 
   /*
+   ***********************************************************************
     Open serial port device for reading and writing and not as controlling tty
     because we don't want to get killed if linenoise sends CTRL-C.
+    ************************************************************************
   */
 
 
@@ -80,50 +85,58 @@ int main(int argc, char** argv)
       exit(-1);
     }
     printf("New termios structure is set\n");
+/*********************************************/
+
+
 
     char SET[5];
     SET[0] = FLAG;
     SET[1] = FIELD_A_SC;
     SET[2] = CONTROL_SET;
-    SET[3] = 0x00;
+    SET[3] = SET[1] ^ SET[2];
     SET[4] = FLAG;
 
     /*******************
      * Send Message
      * ****************/
-    printf("[STARTING CONNECTION]  Sending SET");
+    printf("[STARTING CONNECTION]\n");
+    printf("[SENDING MESSAGE]\n");
+    printf("SET: ");
+    for (int i = 0; i < 5; i++){  
+      printf("%4X ", SET[i]);
+    }
+    printf("\n");
 
     res = write(fd, SET, sizeof(SET));
-    printf(" %d bytes writen\n", res);
     
-    exit(1);
     char in_message[255];
+    bzero(in_message, sizeof(in_message));
     int position = 0;
 
-    printf("Read send back message:\n");
-
-    while (STOP==FALSE) {       /* loop for input */
+    printf("[MESSAGE RECEIVED]\n");
+    int count = 0;
+    while (count < 5) {       /* loop for input */
       res = read(fd,buf,1);   /* returns after 1 chars have been input */
       buf[res] = 0;               /* so we can printf... */
-      printf("%s:%d\n", buf, res);
       in_message[position++] = buf[0];
 
-      if(buf[0] == '\0') STOP=TRUE;
+      count++;
     }
 
-    printf("Mesage received: %s with %d bytes\n", in_message, res);
+    printf("UA: ");
+    for (int i = 0; i < 5; i++){
+       printf("%4X ", in_message[i]);
+    }
+    printf("received\n");
+    
+    
   
-
 
    //Voltar a colocar a estrutura termios no estado inicial
     if ( tcsetattr(fd,TCSANOW,&oldtio) == -1) {
       perror("tcsetattr");
       exit(-1);
     }
-
-
-
-
     close(fd);
     return 0;
 }
