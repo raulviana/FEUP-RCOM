@@ -81,10 +81,7 @@ int main(int argc, char** argv)
     printf("%d bytes written\n", res);
  
 
-  /* 
-    O ciclo FOR e as instru��es seguintes devem ser alterados de modo a respeitar 
-    o indicado no gui�o 
-  */
+
     bzero(&buf, sizeof(buf));
 
       while (STOP==FALSE) {       /* loop for input */
