@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 
 #define BAUDRATE B38400
 #define MODEMDEVICE "/dev/ttyS1"
@@ -25,23 +26,41 @@
 #define BCC2 0x00
 
 
-volatile int STOP=FALSE;
+int flag=1, conta=1;
+void atende()       // atende alarme
+{
+	if(conta <= 3){
+    printf("#%d: Return message not received, waiting 3 more seconds..\n", conta);
+    flag=1;
+    conta++;
+  }
+  else{
+    printf("[EXITING]\n Remote App couldnt establish communication, aborting\n");
+    exit(-1);
+  }
+  alarm(3);
+}
+
+int check_bcc1(char control_message[], int size);
+
 
 int main(int argc, char** argv)
 {
-    int fd, c, res;
-    struct termios oldtio,newtio;
-    int i, sum = 0, speed = 0;
-    char buf[255];
-    
-    if ( (argc < 2) || 
-  	     ((strcmp("/dev/ttyS10", argv[1])!=0) && 
-  	      (strcmp("/dev/ttyS11", argv[1])!=0) )) {
-      printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttySX\n");
-      exit(1);
-    }
+  (void) signal(SIGALRM, atende);  // instala  rotina que atende interrupcao
 
-  printf("-->SENDER<--\n");
+  int fd, c, res;
+  struct termios oldtio,newtio;
+  int i, sum = 0, speed = 0;
+  char buf[255];
+  
+  if ( (argc < 2) || 
+        ((strcmp("/dev/ttyS10", argv[1])!=0) && 
+        (strcmp("/dev/ttyS11", argv[1])!=0) )) {
+    printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttySX\n");
+    exit(1);
+  }
+
+  printf("        -->SENDER<--\n");
 
   /*
    ***********************************************************************
@@ -101,7 +120,7 @@ int main(int argc, char** argv)
      * ****************/
     printf("[STARTING CONNECTION]\n");
     printf("[SENDING MESSAGE]\n");
-    printf("SET: ");
+    printf(" SET: ");
     for (int i = 0; i < 5; i++){  
       printf("%4X ", SET[i]);
     }
@@ -113,8 +132,9 @@ int main(int argc, char** argv)
     bzero(in_message, sizeof(in_message));
     int position = 0;
 
-    printf("[MESSAGE RECEIVED]\n");
-    int count = 0;
+    
+    int count = 0; 
+    alarm(3);                 // activa alarme de 3s
     while (count < 5) {       /* loop for input */
       res = read(fd,buf,1);   /* returns after 1 chars have been input */
       buf[res] = 0;               /* so we can printf... */
@@ -122,12 +142,22 @@ int main(int argc, char** argv)
 
       count++;
     }
-
-    printf("UA: ");
+    printf("[MESSAGE RECEIVED]\n");
+    printf(" UA: ");
     for (int i = 0; i < 5; i++){
        printf("%4X ", in_message[i]);
     }
     printf("received\n");
+
+    if(! check_bcc1(in_message, sizeof(in_message))){
+      printf("[ERROR]\n BCC check error: exiting!\n");
+      exit(-2);
+    }
+    else{
+      printf("[INFO]\n BCC is correct!\n");
+    }
+    
+    printf("[CONNECTION ESTABLISHED]\n");
     
     
   
@@ -139,4 +169,11 @@ int main(int argc, char** argv)
     }
     close(fd);
     return 0;
+}
+
+
+int check_bcc1(char control_message[], int size){
+  char this_bcc = control_message[1] ^ control_message[2];
+  if(this_bcc == control_message[3]) return TRUE;
+  else return FALSE;
 }

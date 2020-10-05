@@ -22,7 +22,7 @@
 #define BCC1 0x00
 #define BCC2 0x00
 
-volatile int STOP=FALSE;
+int check_bcc1(char control_message[], int size);
 
 int main(int argc, char** argv)
 {
@@ -36,7 +36,7 @@ int main(int argc, char** argv)
       exit(1);
     }
 
-    printf("-->RECEIVER<--\n");
+    printf("      -->RECEIVER<--\n");
 
   /*
     Open serial port device for reading and writing and not as controlling tty
@@ -89,11 +89,20 @@ int main(int argc, char** argv)
       count = count + res;
     }
 
-     printf("[MESSAGE RECEIVED]\n");
-    printf("SET: ");
-     for (int i = 0; i < 5; i++){
-       printf("%4X ", in_message[i]);
-     }
+    printf("[MESSAGE RECEIVED]\n");
+    printf(" SET: ");
+      for (int i = 0; i < 5; i++){
+      printf("%4X ", in_message[i]);
+    }
+    printf("\n");
+
+    if(! check_bcc1(in_message, sizeof(in_message))){
+      printf("[ERROR]\n BCC check error: exiting!\n");
+      exit(-2);
+    }
+    else{
+      printf("[INFO]\n BCC is correct!\n");
+    }
   
     char UA[5];
     UA[0] = FLAG;
@@ -104,8 +113,8 @@ int main(int argc, char** argv)
 
     res = write(fd, UA, sizeof(UA));
 
-    printf("\n[MESSAGE SENT]\n");
-    printf("UA: ");
+    printf("[MESSAGE SENT]\n");
+    printf(" UA: ");
     for (int i = 0; i < 5; i++){  
       printf("%4X ", UA[i]);
     }
@@ -115,4 +124,10 @@ int main(int argc, char** argv)
     tcsetattr(fd,TCSANOW,&oldtio);
     close(fd);
     return 0;
+}
+
+int check_bcc1(char control_message[], int size){
+  char this_bcc = control_message[1] ^ control_message[2];
+  if(this_bcc == control_message[3]) return TRUE;
+  else return FALSE;
 }
