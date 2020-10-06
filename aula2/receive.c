@@ -17,8 +17,8 @@
 #define CONTROL_SET 0x02
 #define CONTROL_DISC 0x0b
 #define CONTROL_UA 0x07
-#define FIELD_A_SC 0x03
-#define FIELD_A_RC 0x01
+#define FIELD_A_SC 0x03  // A ou C
+#define FIELD_A_RC 0x01  //
 #define BCC1 0x00
 #define BCC2 0x00
 
@@ -120,7 +120,7 @@ int main(int argc, char** argv)
     }
     printf("\n");
 
-
+    sleep(2);
     tcsetattr(fd,TCSANOW,&oldtio);
     close(fd);
     return 0;

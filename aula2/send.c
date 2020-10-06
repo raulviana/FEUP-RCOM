@@ -89,14 +89,10 @@ int main(int argc, char** argv)
     newtio.c_cc[VTIME]    = 0;   /* inter-character timer unused */
     newtio.c_cc[VMIN]     = 1;   /* blocking read until 5 chars received */
 
-
-
   /* 
     VTIME e VMIN devem ser alterados de forma a proteger com um temporizador a 
     leitura do(s) pr�ximo(s) caracter(es)
   */
-
-
     tcflush(fd, TCIOFLUSH);
 
     if ( tcsetattr(fd,TCSANOW,&newtio) == -1) {
@@ -132,7 +128,7 @@ int main(int argc, char** argv)
     bzero(in_message, sizeof(in_message));
     int position = 0;
 
-    
+    //Recebe mensagem de volta
     int count = 0; 
     alarm(3);                 // activa alarme de 3s
     while (count < 5) {       /* loop for input */
@@ -163,6 +159,7 @@ int main(int argc, char** argv)
   
 
    //Voltar a colocar a estrutura termios no estado inicial
+    sleep(2);
     if ( tcsetattr(fd,TCSANOW,&oldtio) == -1) {
       perror("tcsetattr");
       exit(-1);

@@ -1,0 +1,8 @@
+
+Flag - 7e
+A campo de endereço - 0x03 ou 0x01
+C campo de controlo SET 0x03, UA 0x07
+
+maquina de estados:
+
+    
