@@ -6,6 +6,7 @@
 #define FALSE 0
 #define TRUE 1
 
+
 #define FLAG 0x7E
 #define CONTROL_SET 0x02
 #define CONTROL_DISC 0x0b
@@ -17,3 +18,10 @@
 
 #define TIMEOUT 3
 #define MAX_TRIES 3
+
+
+#define SENDER_PORT "/dev/ttyS10"
+#define RECEIVER_PORT "/dev/ttyS11"
+#define RECEIVER 2
+#define SENDER 1
+extern struct termios oldtio,newtio;

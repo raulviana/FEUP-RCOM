@@ -1,12 +1,6 @@
 #!/bin/bash
 
-rm -rf ./receive
-
-rm -rf ./send
-
-gcc send.c -o send
-
-gcc receive.c -o receive
+make
 
 gnome-terminal -x sh -c "./receive /dev/ttyS11; bash"
 

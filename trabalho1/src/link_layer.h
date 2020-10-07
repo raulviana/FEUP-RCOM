@@ -1,3 +1,5 @@
+#pragma once
 
+int llopen(int type);
 
-int startConnection(char fileName[], struct termios *newtio, struct termios *oldtio);
+int llclose(int fd);
