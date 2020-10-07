@@ -1,41 +1,35 @@
-
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <termios.h>
 #include <stdio.h>
-#include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <fcntl.h> 
 #include <unistd.h>
-#include <unistd.h>
+#include <signal.h>
+#include <strings.h>
 
 
-
+int flag=1, conta=1;
+void atende()       // atende alarme
+{
+	if(conta <= 3){
+    printf("#%d: Return message not received, waiting 3 more seconds..\n", conta);
+    flag=1;
+    conta++;
+  }
+  else{
+    printf("[EXITING]\n Remote App couldnt establish communication, aborting\n");
+    exit(-1);
+  }
+  alarm(3);
+}
 
 int main(){
 
-    struct stat meta;
+     (void) signal(SIGALRM, atende);
 
-    int fd_file = open("pinguim.gif", O_RDONLY);
-
-    fstat(fd_file, &meta);
-    
-    char buf[meta.st_size];
-
-    read(fd_file, &buf, sizeof(buf));
-
-    printf("FileSIze: %ld\n", meta.st_size);
-
-    printf("Buf size: %ld\n", sizeof(buf));
-
-    for(int i = 0; i < sizeof(buf); i++){
-        printf("%d", buf[i]);
-    }
-   
-
-
-    
-    close(fd_file);
-
+alarm(3);
+while(1){}
     return 0;
 }
