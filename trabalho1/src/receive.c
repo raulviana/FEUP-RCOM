@@ -35,7 +35,7 @@ int main(int argc, char** argv)
     if(fd == -1){
       perror("[ERROR] Could not establish connection\n");
       exit(-1);
-    }  //Connection online
+    }  //else -> Connection online
     
     char in_message[255];
     bzero(in_message, sizeof(in_message));

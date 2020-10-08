@@ -46,29 +46,10 @@ int main(int argc, char** argv)
   if(fd == -1){
     perror("Termios not properly set\n[EXITING]\n");
     exit(-2);
-  }
+  } //else -> connection online
 
 
 
-  char SET[5];
-  SET[0] = FLAG;
-  SET[1] = CONTROL_A_SC;
-  SET[2] = CONTROL_SET;
-  SET[3] = BCC(SET[1], SET[2]);
-  SET[4] = FLAG;
-
-  /*******************
-   * Send Message
-   * ****************/
-  printf("[STARTING CONNECTION]\n");
-  printf("[SENDING MESSAGE]\n");
-  printf(" SET: ");
-  for (int i = 0; i < 5; i++){  
-    printf("%4X ", SET[i]);
-  }
-  printf("\n");
-
-  res = write(fd, SET, sizeof(SET));
   
   char in_message[255];
   bzero(in_message, sizeof(in_message));

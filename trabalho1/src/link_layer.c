@@ -18,9 +18,50 @@
 #define SENDER 1
 #define RECEIVER 2
 
+unsigned char SET[] = { FLAG, CONTROL_A, CONTROL_SET, BCC(CONTROL_A, CONTROL_SET), FLAG};
+unsigned char UA[] = {FLAG, CONTROL_A, CONTROL_UA, BCC(CONTROL_A, CONTROL_UA), FLAG};
+
 struct termios newtio, oldtio;
 
 int llopen(int type){
+
+    int fd = startConnection(type);
+    int res;
+    //sender
+    if(type == SENDER){
+      //sen SET
+      printf("[STARTING CONNECTION]\n");
+      printf("[SENDING SET]\n");
+      res = write(fd, SET, sizeof(SET));
+      //receive UA
+
+    }
+    //receiver
+    else{
+      //receive SET
+      readMessage(fd, SET);
+      //send UA
+    }
+    
+
+    //OK
+    return fd;
+}
+
+int llclose(int fd){
+
+   //Voltar a colocar a estrutura termios no estado inicial
+    sleep(2);
+    if ( tcsetattr(fd,TCSANOW,&oldtio) == -1) {
+      perror("tcsetattr");
+      return -1;
+    }
+    close(fd);
+    return TRUE;
+}
+
+int startConnection(int type){
+
     /*
    ***********************************************************************
     Open serial port device for reading and writing and not as controlling tty
@@ -28,7 +69,6 @@ int llopen(int type){
     ************************************************************************
   */
     int fd;
-
     if(type == SENDER) fd = open(SENDER_PORT, O_RDWR | O_NOCTTY );
     else fd = open(RECEIVER_PORT, O_RDWR | O_NOCTTY );
     
@@ -61,18 +101,64 @@ int llopen(int type){
       return -1;
     }
     printf("New termios structure is set\n");
-/*********************************************/
-    return fd;
+  /*********************************************/
+  return fd;
 }
 
-int llclose(int fd){
+int readMessage(int fd, unsigned char commandExpected[]){
+  enum state current = START;
 
-   //Voltar a colocar a estrutura termios no estado inicial
-    sleep(2);
-    if ( tcsetattr(fd,TCSANOW,&oldtio) == -1) {
-      perror("tcsetattr");
-      return -1;
-    }
-    close(fd);
-    return TRUE;
+  unsigned char buf;
+
+  while (current != STOP){
+    read(fd, buf, 1);
+    COM_currentMachine(&current, buf);
+  }
+}
+
+void COM_currentMachine(enum state *current, unsigned char buf){
+  unsigned char control_byte;
+
+  switch (*current){
+			case START:
+				if (buf==FLAG) current = READ_FLAG;
+        else current=START;
+			break;
+
+			case READ_FLAG:
+				if(buf == CONTROL_A) current = READ_CONTROL_A;
+        else if(buf==FLAG)
+					current = READ_FLAG;
+				else
+					current= START;
+			break;
+
+			case READ_CONTROL_A: 
+				if(check_control(buf)){
+          control_byte = buf;
+          current=READ_CONTROL;
+        }
+				else if(buf==FLAG)
+					current=READ_FLAG;
+				else
+					current=START;
+			break;
+
+			case READ_CONTROL: 
+				if(buf == BCC(CONTROL_A, control_byte)) current=BCC_OK;
+        else if (buf==FLAG) current=READ_FLAG;
+				else
+					current=START;
+			break;
+
+			case BCC_OK:
+				if(buf==FLAG){
+					current = STOP;
+          return;
+				}
+        else current=START;
+							
+			break;
+
+		}	
 }

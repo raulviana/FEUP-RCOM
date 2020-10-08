@@ -11,8 +11,7 @@
 #define CONTROL_SET 0x02
 #define CONTROL_DISC 0x0b
 #define CONTROL_UA 0x07
-#define CONTROL_A_SC 0x03
-#define CONTROL_A_RC 0x01
+#define CONTROL_A 0x03
 #define BCC(X, Y) (X) ^ (Y)
 
 
@@ -24,4 +23,14 @@
 #define RECEIVER_PORT "/dev/ttyS11"
 #define RECEIVER 2
 #define SENDER 1
+
 extern struct termios oldtio,newtio;
+
+enum state {
+ 	START,
+ 	READ_FLAG,
+ 	READ_CONTROL_A,
+    READ_CONTROL,
+ 	BCC_OK,
+	STOP
+};
