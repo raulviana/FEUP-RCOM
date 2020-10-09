@@ -1,13 +1,10 @@
 
 CC= gcc
 
-all: link data alarm send receive
+all: link alarm send receive
 
 link: link_layer.c
 	$(CC) -c -o link_layer link_layer.c
-
-data: data_layer.c
-	$(CC) -c -o data_layer data_layer.c
 
 alarm: alarm.c
 	$(CC) -c -o alarm alarm.c

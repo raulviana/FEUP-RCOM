@@ -36,59 +36,14 @@ int main(int argc, char** argv)
       perror("[ERROR] Could not establish connection\n");
       exit(-1);
     }  //else -> Connection online
-    
-    char in_message[255];
-    bzero(in_message, sizeof(in_message));
-    int position = 0;
-    int count = 0;
+      
+    printf("[CONNECTION ONLINE]\n");
 
-    while (count < 5) {       /* loop for input */
-      res = read(fd,buf,1);   /* returns after 1 chars have been input */
-      buf[res] = 0;               /* so we can printf... */
-      in_message[position++] = buf[0];
 
-      count = count + res;
-    }
-
-    printf("[MESSAGE RECEIVED]\n");
-    printf(" SET: ");
-      for (int i = 0; i < 5; i++){
-      printf("%4X ", in_message[i]);
-    }
-    printf("\n");
-
-    if(! check_bcc1(in_message, sizeof(in_message))){
-      printf("[ERROR]\n BCC check error: exiting!\n");
-      exit(-2);
-    }
-    else{
-      printf("[INFO]\n BCC is correct!\n");
-    }
-  
-    char UA[5];
-    UA[0] = FLAG;
-    UA[1] = CONTROL_A_SC;
-    UA[2] = CONTROL_UA;
-    UA[3] = BCC(UA[1], UA[2]);
-    UA[4] = FLAG;
-
-    res = write(fd, UA, sizeof(UA));
-
-    printf("[MESSAGE SENT]\n");
-    printf(" UA: ");
-    for (int i = 0; i < 5; i++){  
-      printf("%4X ", UA[i]);
-    }
-    printf("\n");
-
-  
+    printf("[CONNECTION CLOSED]\n");
+   
     llclose(fd);
 
     return 0;
 }
 
-int check_bcc1(char control_message[], int size){
-  char this_bcc = control_message[1] ^ control_message[2];
-  if(this_bcc == control_message[3]) return TRUE;
-  else return FALSE;
-}

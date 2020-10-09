@@ -26,11 +26,3 @@
 
 extern struct termios oldtio,newtio;
 
-enum state {
- 	START,
- 	READ_FLAG,
- 	READ_CONTROL_A,
-    READ_CONTROL,
- 	BCC_OK,
-	STOP
-};

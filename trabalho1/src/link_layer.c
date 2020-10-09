@@ -1,6 +1,7 @@
 
 #include "link_layer.h"
 #include "constants.h"
+#include "alarm.h"
 
 #include <stdio.h>
 #include <termios.h>
@@ -22,25 +23,56 @@ unsigned char SET[] = { FLAG, CONTROL_A, CONTROL_SET, BCC(CONTROL_A, CONTROL_SET
 unsigned char UA[] = {FLAG, CONTROL_A, CONTROL_UA, BCC(CONTROL_A, CONTROL_UA), FLAG};
 
 struct termios newtio, oldtio;
+enum state current;
 
 int llopen(int type){
 
-    int fd = startConnection(type);
-    int res;
-    //sender
-    if(type == SENDER){
-      //sen SET
-      printf("[STARTING CONNECTION]\n");
-      printf("[SENDING SET]\n");
-      res = write(fd, SET, sizeof(SET));
-      //receive UA
+  int fd = startConnection(type);
+  int res;
+  //sender
+  if(type == SENDER){
+    //send SET
+    printf("[STARTING CONNECTION]\n");
+    printf("[SENDING SET]\n");
+    res = write(fd, SET, sizeof(SET));
+    //receive UA
+    char in_message[5];
+    unsigned char buf[1];
+    bzero(in_message, sizeof(in_message));
+    int position = 0;
+    int count = 0; 
+    setAlarm(3);                 // activa alarme de 3s
+    while (count < 5) {    /* loop for input */
+      res = read(fd,buf,1);   /* returns after 1 chars have been input */
+      in_message[position++] = buf[0];
+      count++;
+      }
+    cancelAlarm();
 
+    if(! check_bcc1(in_message, sizeof(in_message))){
+    printf("[ERROR]\n BCC check error: exiting!\n");
+    return -1;
+    }
+    else{
+      printf("[INFO]\n BCC is correct!\n");
+    }
     }
     //receiver
     else{
       //receive SET
       readMessage(fd, SET);
-      //send UA
+      printf("[SET RECEIVED]\n");
+
+      //send UA char UA[5];
+      UA[0] = FLAG;
+      UA[1] = CONTROL_A;
+      UA[2] = CONTROL_UA;
+      UA[3] = BCC(UA[1], UA[2]);
+      UA[4] = FLAG;
+
+      res = write(fd, UA, sizeof(UA));
+  
+      printf("[UA SENDED]\n");
     }
     
 
@@ -106,59 +138,66 @@ int startConnection(int type){
 }
 
 int readMessage(int fd, unsigned char commandExpected[]){
-  enum state current = START;
+  current = START;
 
-  unsigned char buf;
+  unsigned char buf[1];
 
   while (current != STOP){
     read(fd, buf, 1);
-    COM_currentMachine(&current, buf);
+    COM_currentMachine(&current, buf[0]);
   }
 }
 
-void COM_currentMachine(enum state *current, unsigned char buf){
+void COM_currentMachine(enum state* current, unsigned char buf){
   unsigned char control_byte;
 
   switch (*current){
 			case START:
-				if (buf==FLAG) current = READ_FLAG;
-        else current=START;
+				if (buf==FLAG) *current = READ_FLAG;
+        else *current=START;
 			break;
 
 			case READ_FLAG:
-				if(buf == CONTROL_A) current = READ_CONTROL_A;
+				if(buf == CONTROL_A) *current = READ_CONTROL_A;
         else if(buf==FLAG)
-					current = READ_FLAG;
+					*current = READ_FLAG;
 				else
-					current= START;
+					*current= START;
 			break;
 
 			case READ_CONTROL_A: 
-				if(check_control(buf)){
+				if(buf == CONTROL_SET){
           control_byte = buf;
-          current=READ_CONTROL;
+          *current=READ_CONTROL;
         }
 				else if(buf==FLAG)
-					current=READ_FLAG;
+					*current=READ_FLAG;
 				else
-					current=START;
+					*current=START;
 			break;
 
 			case READ_CONTROL: 
-				if(buf == BCC(CONTROL_A, control_byte)) current=BCC_OK;
-        else if (buf==FLAG) current=READ_FLAG;
+				if(buf == BCC(CONTROL_A, control_byte)) *current=BCC_OK;
+        else if (buf==FLAG) *current=READ_FLAG;
 				else
-					current=START;
+					*current=START;
 			break;
 
 			case BCC_OK:
 				if(buf==FLAG){
-					current = STOP;
+					*current = STOP;
           return;
 				}
-        else current=START;
+        else *current=START;
 							
 			break;
 
 		}	
 }
+
+int check_bcc1(char control_message[], int size){
+  char this_bcc = control_message[1] ^ control_message[2];
+  if(this_bcc == control_message[3]) return TRUE;
+  else return FALSE;
+}
+
