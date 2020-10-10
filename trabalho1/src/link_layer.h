@@ -3,8 +3,8 @@
 enum state {
  	START,
  	READ_FLAG,
- 	READ_CONTROL_A,
-    READ_CONTROL,
+ 	READ_CONTROL,
+    READ_BCC,
  	BCC_OK,
 	STOP
 };
@@ -12,7 +12,7 @@ enum state {
 
 int llopen(int type);
 
-int llclose(int fd);
+int llclose(int fd, int type);
 
 void COM_currentMachine(enum state* current, unsigned char buf);
 
@@ -20,4 +20,4 @@ int readMessage(int fd, unsigned char commandExpected[]);
 
 int startConnection(int type);
 
-int check_bcc1(char control_message[], int size);
+int closeConnection(int fd);

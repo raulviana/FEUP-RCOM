@@ -22,6 +22,7 @@ void setAlarm(int seconds){
 
 void cancelAlarm(){
     alarm(0);
+    conta = 1;
 }
 
 void atende()       // atende alarme
@@ -31,8 +32,8 @@ void atende()       // atende alarme
     conta++;
   }
   else{
-    printf("[EXITING]\n Remote App couldnt establish communication, aborting\n");
+    printf("[EXITING]\n Max timeout reached, aborting\n");
     exit(-1);
   }
-  alarm(TIMEOUT);
+  setAlarm(TIMEOUT);
 }

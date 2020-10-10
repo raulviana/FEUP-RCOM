@@ -39,11 +39,22 @@ int main(int argc, char** argv)
       
     printf("[CONNECTION ONLINE]\n");
 
+   
+    /*    +++++++DATA SEnding+++++++++++++++   */
 
+
+
+
+
+
+
+    /*    +++++++++++++++++++++++++++++++++++   */
+
+
+    llclose(fd, RECEIVER);
     printf("[CONNECTION CLOSED]\n");
    
-    llclose(fd);
-
     return 0;
 }
+
 

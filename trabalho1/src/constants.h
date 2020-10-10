@@ -11,7 +11,7 @@
 #define CONTROL_SET 0x02
 #define CONTROL_DISC 0x0b
 #define CONTROL_UA 0x07
-#define CONTROL_A 0x03
+#define CONTROL 0x03
 #define BCC(X, Y) (X) ^ (Y)
 
 
@@ -26,3 +26,10 @@
 
 extern struct termios oldtio,newtio;
 
+typedef struct{
+    char* send_fileName;
+    char* receive_fleName;
+    int open_fd;
+    int close_fd;
+    int fileSize;
+} FileInfo;
