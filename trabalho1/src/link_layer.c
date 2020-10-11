@@ -204,6 +204,11 @@ int closeConnection(int fd){
 }
 
 int llwrite(int fd, unsigned char packet[], int index){
-  printf("writing\n");
+  //compose frame
+  //frame header
+  //process data
+  //frame footer
+  
+   
   return 0;
 }
