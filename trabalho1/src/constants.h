@@ -1,18 +1,28 @@
 
 
 #define FILENAME "pinguim.gif"
+
 #define BAUDRATE B38400
+#define MAX_FRAME_SIZE 512
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
+
 #define FALSE 0
 #define TRUE 1
-
 
 #define FLAG 0x7E
 #define CONTROL_SET 0x02
 #define CONTROL_DISC 0x0b
 #define CONTROL_UA 0x07
 #define CONTROL 0x03
+#define START_CONTROL 0x02
+#define END_CONTROL 0x03
 #define BCC(X, Y) (X) ^ (Y)
+
+#define CONTROL_SIZE 5
+#define FILE_SIZE_FIELD 0x00
+#define FILE_NAME_FIELD 0x01
+
+
 
 
 #define TIMEOUT 3

@@ -21,3 +21,5 @@ int readMessage(int fd, unsigned char commandExpected[]);
 int startConnection(int type);
 
 int closeConnection(int fd);
+
+int llwrite(int fd, unsigned char packet[], int index);

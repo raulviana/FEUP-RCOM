@@ -17,7 +17,7 @@
 
 extern int conta;
 
-int check_bcc1(char control_message[], int size);
+int sendControlPacket(int fd, int control_type, FileInfo FileInfo);
 
 int main(int argc, char** argv)
 {
@@ -66,12 +66,18 @@ int main(int argc, char** argv)
     fileInfo.send_fileName = FILENAME;
 
     //construct and send opening control packet
+    if(sendControlPacket(fd, START_CONTROL, fileInfo) == -1){
+      perror("[ERROR]\n Error sending start control packet\n");
+      exit(-1);
+    }
 
     //send data packets
 
     //construct and send closing control packet
-
-
+    if(sendControlPacket(fd, END_CONTROL, fileInfo) == -1){
+      perror("[ERROR]\n Error sending ending control packet\n");
+      exit(-1);
+    }
 
     /*    +++++++++++++++++++++++++++++++++++   */
 
@@ -82,4 +88,39 @@ int main(int argc, char** argv)
     printf("[CONNECTION CLOSED]\n");
     
     return 0;
+}
+
+int sendControlPacket(int fd, int control_type, FileInfo fileInfo){
+  unsigned int index = 0;
+  unsigned int file_size_length = sizeof(fileInfo.fileSize);
+  //[C, T1, L1, ..., T2, L2, ...] = 5 (COntrol Size)
+  unsigned char packet[CONTROL_SIZE + file_size_length + strlen(fileInfo.send_fileName)];
+
+  packet[index++] = control_type;
+
+  //insert file size T1, L1 and value
+  packet[index++] = FILE_SIZE_FIELD;
+  packet[index++] = file_size_length;
+  unsigned char byteArray[file_size_length];
+  //transformar int em array de chars
+  for (int i = 0; i < file_size_length; i++){
+		byteArray[i] = (fileInfo.fileSize >> 8*(file_size_length - 1 - i)) & 0xFF; //masking
+	}
+  //colocar os chars no packet
+  for (int i = 0; i < file_size_length; i++){
+		packet[index++] = byteArray[i];
+	}
+
+  //insert file name
+  packet[index++] = FILE_NAME_FIELD;
+  packet[index++] = strlen(fileInfo.send_fileName);
+  for (int i = 0; i < strlen(fileInfo.send_fileName); i++){
+    packet[index++] = fileInfo.send_fileName[i];
+  }
+
+  int res = llwrite(fd, packet, index);
+  if (res == -1){
+    return -1;
+  }
+  return 0;
 }

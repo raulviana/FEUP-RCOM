@@ -202,3 +202,8 @@ int closeConnection(int fd){
   close(fd);
   return TRUE;
 }
+
+int llwrite(int fd, unsigned char packet[], int index){
+  printf("writing\n");
+  return 0;
+}

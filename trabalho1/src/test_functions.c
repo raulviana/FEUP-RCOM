@@ -9,23 +9,28 @@
 #include <signal.h>
 #include <strings.h>
 
-#include "alarm.h"
 
 int main(){
+size_t sentFileSize = 3400;
+int file_size_length = sizeof(sentFileSize);
+unsigned char byteArray[file_size_length];
 
-     (void) signal(SIGALRM, atende);
-
-setAlarm(3);
-int count = 0;
-while(count < 2){
-     sleep(7);
-     count++;
+for (int i = 0; i < file_size_length; i++){
+		byteArray[i] = (sentFileSize >> 8*(file_size_length - 1 - i)) & 0xFF;
+	}
+for(int i = 0; i < file_size_length; i++){
+     printf("%4X ", byteArray[i]);
 }
-cancelAlarm();
-setAlarm(2);
-while(1){
-     sleep(25);
+printf("\n");
+
+
+int index = 0;
+int file= 0;
+for (int i = 0; i < file_size_length; i++){
+			file += byteArray[index] << 8 * (file_size_length - 1 - i);
+			index++;
 }
 
+printf("SIze: %d\n", file);
 return 0;
 }
