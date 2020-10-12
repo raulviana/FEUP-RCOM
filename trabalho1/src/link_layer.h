@@ -1,5 +1,10 @@
 #pragma once
 
+#define C0 0x00
+#define C1 0x40
+#define BYTE_STUFF 0x20
+#define ESC 0x7d
+
 enum state {
  	START,
  	READ_FLAG,
@@ -9,6 +14,12 @@ enum state {
 	STOP
 };
 
+typedef struct {
+	unsigned int N_s;
+	unsigned int framesSent;
+}Link_control;
+
+extern Link_control link_control;
 
 int llopen(int type);
 
@@ -23,3 +34,4 @@ int startConnection(int type);
 int closeConnection(int fd);
 
 int llwrite(int fd, unsigned char packet[], int index);
+

@@ -25,11 +25,13 @@ unsigned char DISC[5] = {FLAG, CONTROL, CONTROL_DISC, BCC(CONTROL, CONTROL_DISC)
 
 struct termios newtio, oldtio;
 enum state current;
+Link_control link_control;
 
 int llopen(int type){
 
 
   int fd = startConnection(type);
+  link_control.N_s = 0;
   int res;
   //sender
   if(type == SENDER){
@@ -63,13 +65,13 @@ int llclose(int fd, int type){
   //sender
   if(type == SENDER){
     //send DISC
-    printf("[CLOSING CONNECTION]\n [INFO]  Sending DISC\n");
+    printf("[CLOSING CONNECTION]\n[INFO]\n  Sending DISC\n");
     write(fd, DISC, sizeof(DISC));
     //receive UA
     setAlarm(3);                 // activa alarme de 3s
     readMessage(fd, UA);
     cancelAlarm();
-    printf("[INFO]  UA received\n");
+    printf("[INFO]\n  UA received\n");
   }
   //receiver
   else{
@@ -77,9 +79,9 @@ int llclose(int fd, int type){
     setAlarm(3);                 // activa alarme de 3s
     readMessage(fd, DISC);
     cancelAlarm();
-    printf("[INFO]  DISC received\n");
+    printf("[INFO]\n  DISC received\n");
     //send UA
-    printf("[INFO]  Sending UA\n");
+    printf("[INFO]\n  Sending UA\n");
     write(fd, UA, sizeof(UA));
   }
 
@@ -203,12 +205,43 @@ int closeConnection(int fd){
   return TRUE;
 }
 
-int llwrite(int fd, unsigned char packet[], int index){
+int llwrite(int fd, unsigned char packet[], int packet_size){
   //compose frame
+  //frame: [F, A, C, BCC1, [packet], BCC2, F]
+  unsigned char frame[2 * packet_size + 6]; // 6 = F+A+C+BCC1+BCC2+F || 2*packet para assegurar que existe espaço suficiente para byte stuffing 
   //frame header
+  frame[0] = FLAG;
+  frame[1] = CONTROL;
+  if(link_control.N_s == 0) frame[2] = C0;
+  else frame[2] = C1;
+  frame[3] = BCC(CONTROL, frame[2]);
+
   //process data
+  unsigned int framePosition = 4;
+  unsigned int packetPosition = 0;
+  unsigned char current_packet_char;
+  while(packetPosition < packet_size){
+    current_packet_char = packet[packetPosition++];
+
+    if(current_packet_char == FLAG || current_packet_char == ESC){
+      frame[framePosition++] = ESC;
+      frame[framePosition++] = current_packet_char ^ BYTE_STUFF;
+    }
+    else frame[framePosition++] = current_packet_char;
+
+  } 
   //frame footer
-  
+  unsigned char bcc2 = 0x00;
+  for (int i = 0; i < packet_size; i++){
+    bcc2 ^= packet[i];
+  }
+  frame[framePosition++] = bcc2;
+  frame[framePosition++] = FLAG;
+
+  int res = write(fd, frame, framePosition);
+  link_control.framesSent++;
+  printf("[INFO]\n Sent frame number %d with size %d\n", link_control.framesSent, framePosition);
    
-  return 0;
-}
+  return res;
+  }
+

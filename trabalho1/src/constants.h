@@ -1,6 +1,6 @@
 
 
-#define FILENAME "pinguim.gif"
+#define FILENAME "test.txt"   // "pinguim.gif"
 
 #define BAUDRATE B38400
 #define MAX_FRAME_SIZE 512

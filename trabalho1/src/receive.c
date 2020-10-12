@@ -21,7 +21,6 @@ int main(int argc, char** argv)
 {
     int fd,c, res;
     struct termios oldtio,newtio;
-    char buf[255];
     // if ( (argc < 2) ||
   	//      ((strcmp("/dev/ttyS10", argv[1])!=0) &&
   	//       (strcmp("/dev/ttyS11", argv[1])!=0) )) {
@@ -40,12 +39,15 @@ int main(int argc, char** argv)
     printf("[CONNECTION ONLINE]\n");
 
    
-    /*    +++++++DATA SEnding+++++++++++++++   */
+    /*    +++++++DATA Receiving+++++++++++++++   */
+ 
+    //receive start control packet
+    if(readControlPacket() == -1){
+      perror("[ERROR]\n Error reading start control packet\n");
+      exit(-1);
+    }
 
-
-
-
-
+    //receive data packets
 
 
     /*    +++++++++++++++++++++++++++++++++++   */
@@ -54,7 +56,10 @@ int main(int argc, char** argv)
     llclose(fd, RECEIVER);
     printf("[CONNECTION CLOSED]\n");
    
+
     return 0;
 }
 
-
+int readControlPacket(){
+  //TO-DO
+}
