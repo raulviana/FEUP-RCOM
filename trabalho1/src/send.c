@@ -73,6 +73,7 @@ int main(int argc, char** argv)
 
     //send data packets
 
+    
     //construct and send closing control packet
     if(sendControlPacket(fd, END_CONTROL, fileInfo) == -1){
       perror("[ERROR]\n Error sending ending control packet\n");
