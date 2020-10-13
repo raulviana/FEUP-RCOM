@@ -35,3 +35,5 @@ int closeConnection(int fd);
 
 int llwrite(int fd, unsigned char packet[], int index);
 
+int sendControl();
+

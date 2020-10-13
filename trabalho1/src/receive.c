@@ -42,10 +42,10 @@ int main(int argc, char** argv)
     /*    +++++++DATA Receiving+++++++++++++++   */
  
     //receive start control packet
-    if(readControlPacket() == -1){
+ /*   if(readControlPacket() == -1){
       perror("[ERROR]\n Error reading start control packet\n");
       exit(-1);
-    }
+    }  */
 
     //receive data packets
 

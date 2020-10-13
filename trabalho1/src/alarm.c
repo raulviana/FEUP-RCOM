@@ -13,6 +13,7 @@
 
 #include "alarm.h"
 #include "constants.h"
+#include "link_layer.h"
 
 int conta = 1;
 
@@ -29,11 +30,12 @@ void atende()       // atende alarme
 {
 	if(conta <= MAX_TRIES){
     printf("#%d: Return message not received, waiting 3 more seconds..\n", conta);
-    conta++;
-  }
-  else{
-    printf("[EXITING]\n Max timeout reached, aborting\n");
-    exit(-1);
-  }
-  setAlarm(TIMEOUT);
+	sendControl();    
+	conta++;
+  	}
+  	else{
+    	printf("[EXITING]\n Max timeout reached, aborting\n");
+    	exit(-1);
+  	}
+  	setAlarm(TIMEOUT);
 }

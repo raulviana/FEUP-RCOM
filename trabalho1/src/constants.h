@@ -1,6 +1,7 @@
 
-
 #define FILENAME "test.txt"   // "pinguim.gif"
+#define SENDER_PORT "/dev/ttyS0"
+#define RECEIVER_PORT "/dev/ttyS0"
 
 #define BAUDRATE B38400
 #define MAX_FRAME_SIZE 512
@@ -23,14 +24,10 @@
 #define FILE_NAME_FIELD 0x01
 
 
-
-
 #define TIMEOUT 3
 #define MAX_TRIES 3
 
 
-#define SENDER_PORT "/dev/ttyS10"
-#define RECEIVER_PORT "/dev/ttyS11"
 #define RECEIVER 2
 #define SENDER 1
 
@@ -43,3 +40,5 @@ typedef struct{
     int close_fd;
     int fileSize;
 } FileInfo;
+
+int fd;

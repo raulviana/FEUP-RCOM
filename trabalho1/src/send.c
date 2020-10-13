@@ -16,12 +16,13 @@
 #include "alarm.h"
 
 extern int conta;
+int fd;
 
 int sendControlPacket(int fd, int control_type, FileInfo FileInfo);
 
 int main(int argc, char** argv)
 {
-    int fd,c, res;
+    int c, res;
     struct termios oldtio,newtio;
     char buf[255];
     // if ( (argc < 2) ||

@@ -26,11 +26,12 @@ unsigned char DISC[5] = {FLAG, CONTROL, CONTROL_DISC, BCC(CONTROL, CONTROL_DISC)
 struct termios newtio, oldtio;
 enum state current;
 Link_control link_control;
+extern int fd;
 
 int llopen(int type){
 
 
-  int fd = startConnection(type);
+  fd = startConnection(type);
   link_control.N_s = 0;
   int res;
   //sender
@@ -38,7 +39,7 @@ int llopen(int type){
     //send SET
     printf("[STARTING CONNECTION]\n");
     printf("[SENDING SET]\n");
-    res = write(fd, SET, sizeof(SET));
+    res = sendControl();
     //receive UA
     setAlarm(3);                 // activa alarme de 3s
     readMessage(fd, UA);
@@ -244,4 +245,9 @@ int llwrite(int fd, unsigned char packet[], int packet_size){
    
   return res;
   }
+
+int sendControl(){
+int res = write(fd, SET, sizeof(SET));
+return res;
+}
 
