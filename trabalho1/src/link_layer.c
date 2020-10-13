@@ -28,8 +28,8 @@ enum state current;
 Link_control link_control;
 extern int fd;
 
-int llopen(int type){
 
+int llopen(int type){
 
   fd = startConnection(type);
   link_control.N_s = 0;
@@ -61,6 +61,7 @@ int llopen(int type){
     return fd;
 }
 
+
 int llclose(int fd, int type){
 
   //sender
@@ -90,6 +91,7 @@ int llclose(int fd, int type){
    
   return TRUE;
 }
+
 
 int startConnection(int type){
 
@@ -136,6 +138,7 @@ int startConnection(int type){
   return fd;
 }
 
+
 int readMessage(int fd, unsigned char commandExpected[]){
   current = START;
 
@@ -146,6 +149,7 @@ int readMessage(int fd, unsigned char commandExpected[]){
     COM_currentMachine(&current, buf[0]);
   }
 }
+
 
 void COM_currentMachine(enum state* current, unsigned char buf){
   unsigned char control_byte;
@@ -194,6 +198,7 @@ void COM_currentMachine(enum state* current, unsigned char buf){
 		}	
 }
 
+
 int closeConnection(int fd){
   
   //Voltar a colocar a estrutura termios no estado inicial
@@ -205,6 +210,7 @@ int closeConnection(int fd){
   close(fd);
   return TRUE;
 }
+
 
 int llwrite(int fd, unsigned char packet[], int packet_size){
   //compose frame
@@ -231,11 +237,11 @@ int llwrite(int fd, unsigned char packet[], int packet_size){
     else frame[framePosition++] = current_packet_char;
 
   } 
-  //frame footer
   unsigned char bcc2 = 0x00;
-  for (int i = 0; i < packet_size; i++){
+  for (int i = 0; i < packet_size; i++){//packing packet in frame
     bcc2 ^= packet[i];
   }
+  //frame footer
   frame[framePosition++] = bcc2;
   frame[framePosition++] = FLAG;
 
@@ -246,10 +252,12 @@ int llwrite(int fd, unsigned char packet[], int packet_size){
   return res;
   }
 
+
 int sendControl(){
-int res = write(fd, SET, sizeof(SET));
-return res;
+  int res = write(fd, SET, sizeof(SET));
+  return res;
 }
+
 
 void data_currentMachine(enum state* current, unsigned char buf) {
   unsigned char control_byte;
@@ -305,8 +313,29 @@ void data_currentMachine(enum state* current, unsigned char buf) {
 		default:
 			break;
 	}
+}
 
-	return 0;
+
+int llread(int fd, unsigned char* packet[]){
+  unsigned char frame[MAX_FRAME_SIZE];
+  readFrame(fd, frame);
+  return 0;
+}
+
+int readFrame(int fd, unsigned char* frame){
+  enum state current = START;
+  unsigned char byte_read;
+  int position = 0;
+
+  while (current != STOP){
+    int frame_size = read(fd, &byte_read, 1);
+    data_currentMachine(&current, byte_read);
+    if(current == READ_FLAG ) position = 0;
+    frame[position] = byte_read;
+  }
+
+  link_control.framesReceived++;
+  return position;
 }
 
 

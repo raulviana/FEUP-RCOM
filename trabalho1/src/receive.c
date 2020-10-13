@@ -42,10 +42,10 @@ int main(int argc, char** argv)
     /*    +++++++DATA Receiving+++++++++++++++   */
  
     //receive start control packet
- /*   if(readControlPacket() == -1){
+    if(readControlPacket() == -1){
       perror("[ERROR]\n Error reading start control packet\n");
       exit(-1);
-    }  */
+    }
 
     //receive data packets
 
@@ -60,6 +60,37 @@ int main(int argc, char** argv)
     return 0;
 }
 
+
 int readControlPacket(){
-  //TO-DO
+  unsigned char packet[MAX_FRAME_SIZE];
+  int res = llread(fd, packet);
+ 
+  int index = 1; //after flag
+  int file_size;
+  
+  if(! packet[index] == FILE_SIZE_FIELD) return -1;
+  else{
+      index++;
+      int file_size_length = packet[index++];
+      //transforming chars byte into an int again
+      for(int i = 0; i < file_size_length; i++){
+   	   file_size += packet[index++] << 8 * (file_size_length - 1 - i);
+      }
+  }
+
+  if(! packet[index] == FILE_NAME_FIELD) return -1;
+  else{
+      index++;
+      int name_length = packet[index++];
+      char file_name[name_length + 1];
+      for(int i = 0; i < name_length; i++){
+   	   file_name[i] = packet[index++];
+      }
+      file_name[name_length] = '\0';
+      printf("File %s with size: %d\n", file_name, name_length);
+  }
+ 
+ return 0;
+
 }
+

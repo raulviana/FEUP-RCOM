@@ -5,6 +5,7 @@
 #define BYTE_STUFF 0x20
 #define ESC 0x7d
 
+
 enum state {
  	START,
  	READ_FLAG,
@@ -18,6 +19,7 @@ enum state {
 typedef struct {
 	unsigned int N_s;
 	unsigned int framesSent;
+	unsigned int framesReceived;
 }Link_control;
 
 extern Link_control link_control;
@@ -39,4 +41,7 @@ int llwrite(int fd, unsigned char packet[], int index);
 int sendControl();
 
 void data_currentMachine(enum state* current, unsigned char buf);
+
+int llread(int fd, unsigned char* packet[]);
+
 

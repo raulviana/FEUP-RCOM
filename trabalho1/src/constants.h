@@ -1,7 +1,7 @@
 
 #define FILENAME "test.txt"   // "pinguim.gif"
-#define SENDER_PORT "/dev/ttyS0"
-#define RECEIVER_PORT "/dev/ttyS0"
+#define SENDER_PORT "/dev/ttyS10"
+#define RECEIVER_PORT "/dev/ttyS11"
 
 #define BAUDRATE B38400
 #define MAX_FRAME_SIZE 512
