@@ -251,3 +251,62 @@ int res = write(fd, SET, sizeof(SET));
 return res;
 }
 
+void data_currentMachine(enum state* current, unsigned char buf) {
+  unsigned char control_byte;
+
+	switch(*current) {
+		case START:
+			if(buf == FLAG){
+				*current = READ_FLAG;
+			}
+      else *current=START;
+			break;
+		case READ_FLAG:
+				if(buf == CONTROL) *current = READ_CONTROL;
+        else if(buf==FLAG)
+					*current = READ_FLAG;
+				else
+					*current= START;
+			break;
+		case READ_CONTROL: 
+				if((buf == CONTROL_SET) || (buf == CONTROL_UA) || (buf = CONTROL_DISC)){
+          control_byte = buf;
+          *current=READ_BCC;
+        }
+				else if(buf==FLAG)
+					*current=READ_FLAG;
+				else
+					*current=START;
+			break;
+		case READ_BCC: 
+				if(buf == BCC(CONTROL, control_byte)) *current=BCC_OK;
+        else if (buf==FLAG) *current=READ_FLAG;
+				else
+					*current=START;
+      break;
+    case BCC_OK:
+      if(buf!=FLAG){
+        *current = DATA;
+        return;
+      }
+      else *current=START;
+            
+      break;
+
+    case DATA:
+      if(buf==FLAG){
+        *current = STOP;
+          return;
+				}
+        else *current=START;
+            
+      break;
+
+		default:
+			break;
+	}
+
+	return 0;
+}
+
+

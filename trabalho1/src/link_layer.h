@@ -11,6 +11,7 @@ enum state {
  	READ_CONTROL,
     READ_BCC,
  	BCC_OK,
+	DATA,
 	STOP
 };
 
@@ -36,4 +37,6 @@ int closeConnection(int fd);
 int llwrite(int fd, unsigned char packet[], int index);
 
 int sendControl();
+
+void data_currentMachine(enum state* current, unsigned char buf);
 
