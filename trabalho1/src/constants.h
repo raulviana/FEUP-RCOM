@@ -19,6 +19,11 @@
 #define END_CONTROL 0x03
 #define BCC(X, Y) (X) ^ (Y)
 
+#define C0 0x00
+#define C1 0x40
+#define BYTE_STUFF 0x20
+#define ESC 0x7d
+
 #define CONTROL_SIZE 5
 #define FILE_SIZE_FIELD 0x00
 #define FILE_NAME_FIELD 0x01

@@ -70,7 +70,7 @@ int llclose(int fd, int type){
     printf("[CLOSING CONNECTION]\n[INFO]\n  Sending DISC\n");
     write(fd, DISC, sizeof(DISC));
     //receive UA
-    setAlarm(3);                 // activa alarme de 3s
+    setAlarm(TIMEOUT);                 // activa alarme de 3s
     readMessage(fd, UA);
     cancelAlarm();
     printf("[INFO]\n  UA received\n");
@@ -247,10 +247,12 @@ int llwrite(int fd, unsigned char packet[], int packet_size){
 
   int res = write(fd, frame, framePosition);
   link_control.framesSent++;
+
   printf("[INFO]\n Sent frame number %d with size %d\n", link_control.framesSent, framePosition);
    
   return res;
   }
+
 
 
 int sendControl(){
@@ -277,11 +279,12 @@ void data_currentMachine(enum state* current, unsigned char buf) {
 					*current= START;
 			break;
 		case READ_CONTROL: 
-				if((buf == CONTROL_SET) || (buf == CONTROL_UA) || (buf = CONTROL_DISC)){
+				if((buf == C0) || (buf == C1)){
           control_byte = buf;
           *current=READ_BCC;
         }
 				else if(buf==FLAG)
+
 					*current=READ_FLAG;
 				else
 					*current=START;
@@ -304,23 +307,39 @@ void data_currentMachine(enum state* current, unsigned char buf) {
     case DATA:
       if(buf==FLAG){
         *current = STOP;
-          return;
-				}
-        else *current=START;
-            
+        return;
+			}  
       break;
 
+    case STOP:
+      break;
 		default:
 			break;
 	}
 }
 
 
-int llread(int fd, unsigned char* packet[]){
+int llread(int fd, unsigned char* packet){
   unsigned char frame[MAX_FRAME_SIZE];
-  readFrame(fd, frame);
-  return 0;
+  int frame_length = readFrame(fd, frame);
+  
+  if(frame_length == -1) return -1;
+  //destuff frame
+  unsigned char final_frame[frame_length];
+  int final_frame_length = destuffFrame(frame, frame_length, final_frame);
+  
+  //Get the packet from within the frame
+  int packet_length = 0;
+  for (int i = 4; i < final_frame_length - 2; i++) {
+					packet[packet_length] = final_frame[i];
+					packet_length++;
+	}
+  //send proper response
+  //TO-DO
+
+  return frame_length;
 }
+
 
 int readFrame(int fd, unsigned char* frame){
   enum state current = START;
@@ -330,12 +349,30 @@ int readFrame(int fd, unsigned char* frame){
   while (current != STOP){
     int frame_size = read(fd, &byte_read, 1);
     data_currentMachine(&current, byte_read);
-    if(current == READ_FLAG ) position = 0;
-    frame[position] = byte_read;
+    frame[position++] = byte_read;
   }
-
   link_control.framesReceived++;
   return position;
 }
 
+
+int  destuffFrame(unsigned char* frame, int frame_length, unsigned char* final_frame){
+  final_frame[0] = frame[0];
+  final_frame[1] = frame[1];
+  final_frame[2] = frame[2];
+  final_frame[3] = frame[3]; // FLAG, A, C, BCC1
+
+  int j = 4;
+  int i = 4;
+  for (i; i < frame_length - 1; i++){
+    if(frame[i] == ESC){
+      i++;
+      if(frame[i] == (FLAG ^ BYTE_STUFF)) final_frame[j++] = FLAG;
+      else if (frame[i] == (ESC ^ BYTE_STUFF)) final_frame[j++] = ESC;
+    }
+    final_frame[j++] = frame[i];
+  }
+  final_frame[j++] = frame[i++];
+  return j;
+}
 

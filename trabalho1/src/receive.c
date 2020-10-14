@@ -16,6 +16,7 @@
 extern int conta;
 
 int check_bcc1(char control_message[], int size);
+int readControlPacket();
 
 int main(int argc, char** argv)
 {
@@ -64,10 +65,10 @@ int main(int argc, char** argv)
 int readControlPacket(){
   unsigned char packet[MAX_FRAME_SIZE];
   int res = llread(fd, packet);
- 
-  int index = 1; //after flag
-  int file_size;
+  if(res == -1) return -1;
   
+  int index = 1; //after flag
+  int file_size = 0;
   if(! packet[index] == FILE_SIZE_FIELD) return -1;
   else{
       index++;
@@ -77,7 +78,6 @@ int readControlPacket(){
    	   file_size += packet[index++] << 8 * (file_size_length - 1 - i);
       }
   }
-
   if(! packet[index] == FILE_NAME_FIELD) return -1;
   else{
       index++;
@@ -87,10 +87,9 @@ int readControlPacket(){
    	   file_name[i] = packet[index++];
       }
       file_name[name_length] = '\0';
-      printf("File %s with size: %d\n", file_name, name_length);
+      printf("[INFO]\n Prepared to receive file: %s with size: %d\n", file_name, file_size);
   }
- 
  return 0;
-
 }
+
 

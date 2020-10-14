@@ -1,11 +1,5 @@
 #pragma once
 
-#define C0 0x00
-#define C1 0x40
-#define BYTE_STUFF 0x20
-#define ESC 0x7d
-
-
 enum state {
  	START,
  	READ_FLAG,
@@ -42,6 +36,10 @@ int sendControl();
 
 void data_currentMachine(enum state* current, unsigned char buf);
 
-int llread(int fd, unsigned char* packet[]);
+int llread(int fd, unsigned char* packet);
+
+int readFrame(int fd, unsigned char* frame);
+
+int  destuffFrame(unsigned char* frame, int frame_length, unsigned char* final_frame);
 
 

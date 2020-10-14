@@ -76,14 +76,12 @@ int main(int argc, char** argv)
 
     
     //construct and send closing control packet
-    if(sendControlPacket(fd, END_CONTROL, fileInfo) == -1){
-      perror("[ERROR]\n Error sending ending control packet\n");
-      exit(-1);
-    }
+    // if(sendControlPacket(fd, END_CONTROL, fileInfo) == -1){
+    //   perror("[ERROR]\n Error sending ending control packet\n");
+    //   exit(-1);
+    // }
 
     /*    +++++++++++++++++++++++++++++++++++   */
-
-
 
 
     llclose(fd, SENDER);
@@ -104,9 +102,10 @@ int sendControlPacket(int fd, int control_type, FileInfo fileInfo){
   packet[index++] = FILE_SIZE_FIELD;
   packet[index++] = file_size_length;
   unsigned char byteArray[file_size_length];
+  printf("File size: %d\n", fileInfo.fileSize);
   //transformar int em array de chars
   for (int i = 0; i < file_size_length; i++){
-		byteArray[i] = (fileInfo.fileSize >> 8*(file_size_length - 1 - i)) & 0xFF; //masking
+		byteArray[i] = (fileInfo.fileSize >> 8*(file_size_length - 1 - i)); //masking
 	}
   //colocar os chars no packet
   for (int i = 0; i < file_size_length; i++){
@@ -119,11 +118,11 @@ int sendControlPacket(int fd, int control_type, FileInfo fileInfo){
   for (int i = 0; i < strlen(fileInfo.send_fileName); i++){
     packet[index++] = fileInfo.send_fileName[i];
   }
-
   int res = llwrite(fd, packet, index);
   if (res == -1){
     return -1;
   }
   return 0;
 }
+
 
