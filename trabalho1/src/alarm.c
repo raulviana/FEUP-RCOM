@@ -17,6 +17,8 @@
 
 int conta = 1;
 
+enum phase link_phase;
+
 void setAlarm(int seconds){
     alarm(seconds);
 }
@@ -29,9 +31,17 @@ void cancelAlarm(){
 void atende()       // atende alarme
 {
 	if(conta <= MAX_TRIES){
-    printf("#%d: Return message not received, waiting 3 more seconds..\n", conta);
-	sendControl();    
-	conta++;
+		switch(link_phase){
+			case OPENING_CONNECTION:
+			    printf("#%d: Return message not received, waiting 3 more seconds..\n", conta);
+				sendControl();    
+				conta++;
+				break;
+			case OPEN_CONTROL_PACKET:
+				break;
+			default:
+				break;
+		}
   	}
   	else{
     	printf("[EXITING]\n Max timeout reached, aborting\n");

@@ -15,7 +15,8 @@
 #include "link_layer.h"
 #include "alarm.h"
 
-extern int conta;
+extern enum phase link_phase;
+
 int fd;
 
 int sendControlPacket(int fd, int control_type, FileInfo FileInfo);
@@ -36,6 +37,7 @@ int main(int argc, char** argv)
 
     printf("      -->SEnder<--\n");
 
+    link_phase = OPENING_CONNECTION;
     fd = llopen(SENDER);
     if(fd == -1){
       perror("[ERROR] Could not establish connection\n");
@@ -67,6 +69,7 @@ int main(int argc, char** argv)
     fileInfo.send_fileName = FILENAME;
 
     //construct and send opening control packet
+    link_phase = OPEN_CONTROL_PACKET;
     if(sendControlPacket(fd, START_CONTROL, fileInfo) == -1){
       perror("[ERROR]\n Error sending start control packet\n");
       exit(-1);

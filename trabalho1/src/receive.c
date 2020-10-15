@@ -13,7 +13,8 @@
 #include "constants.h"
 #include "link_layer.h"
 
-extern int conta;
+
+extern enum phase link_phase;
 
 int check_bcc1(char control_message[], int size);
 int readControlPacket();

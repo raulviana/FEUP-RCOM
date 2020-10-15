@@ -46,4 +46,12 @@ typedef struct{
     int fileSize;
 } FileInfo;
 
+enum phase{
+  OPENING_CONNECTION,
+  OPEN_CONTROL_PACKET,
+  SENDING_DATA,
+  CLOSING_CONTROL_PACKET,
+  CLOSINGCONNECTION
+};
+
 int fd;
