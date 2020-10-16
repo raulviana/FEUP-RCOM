@@ -69,7 +69,8 @@ int main(int argc, char** argv)
     fileInfo.send_fileName = FILENAME;
 
     //construct and send opening control packet
-    link_phase = OPEN_CONTROL_PACKET;
+    link_phase = SENDING_DATA;
+    link_control.N_s = 0;
     if(sendControlPacket(fd, START_CONTROL, fileInfo) == -1){
       perror("[ERROR]\n Error sending start control packet\n");
       exit(-1);
@@ -77,7 +78,7 @@ int main(int argc, char** argv)
 
     //send data packets
 
-    
+
     //construct and send closing control packet
     // if(sendControlPacket(fd, END_CONTROL, fileInfo) == -1){
     //   perror("[ERROR]\n Error sending ending control packet\n");
@@ -105,7 +106,6 @@ int sendControlPacket(int fd, int control_type, FileInfo fileInfo){
   packet[index++] = FILE_SIZE_FIELD;
   packet[index++] = file_size_length;
   unsigned char byteArray[file_size_length];
-  printf("File size: %d\n", fileInfo.fileSize);
   //transformar int em array de chars
   for (int i = 0; i < file_size_length; i++){
 		byteArray[i] = (fileInfo.fileSize >> 8*(file_size_length - 1 - i)); //masking
@@ -127,5 +127,6 @@ int sendControlPacket(int fd, int control_type, FileInfo fileInfo){
   }
   return 0;
 }
+
 
 

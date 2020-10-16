@@ -151,7 +151,7 @@ int readMessage(int fd, unsigned char commandExpected[]){
 }
 
 
-void COM_currentMachine(enum state* current, unsigned char buf){
+unsigned char COM_currentMachine(enum state* current, unsigned char buf){
   unsigned char control_byte;
 
   switch (*current){
@@ -169,7 +169,7 @@ void COM_currentMachine(enum state* current, unsigned char buf){
 			break;
 
 			case READ_CONTROL: 
-				if((buf == CONTROL_SET) || (buf == CONTROL_UA) || (buf = CONTROL_DISC)){
+				if((buf == CONTROL_SET) || (buf == CONTROL_UA) || (buf = CONTROL_DISC) || (buf == C0) || (buf == C1)){
           control_byte = buf;
           *current=READ_BCC;
         }
@@ -189,13 +189,14 @@ void COM_currentMachine(enum state* current, unsigned char buf){
 			case BCC_OK:
 				if(buf==FLAG){
 					*current = STOP;
-          return;
+          return control_byte;
 				}
         else *current=START;
 							
 			break;
 
-		}	
+		}
+  return control_byte;
 }
 
 
@@ -245,13 +246,24 @@ int llwrite(int fd, unsigned char packet[], int packet_size){
   frame[framePosition++] = bcc2;
   frame[framePosition++] = FLAG;
 
-  int res = write(fd, frame, framePosition);
+  unsigned int continueFlag = FALSE;
+  int res;
+  do{
+    setAlarm(TIMEOUT);
+    res = write(fd, frame, framePosition);
+    if(readResponse(fd) == -1){ //Received REJ, have to resend frame
+      cancelAlarm();
+      continueFlag= FALSE;
+      continue;
+    }
+  }while(! continueFlag);
+
   link_control.framesSent++;
 
   printf("[INFO]\n Sent frame number %d with size %d\n", link_control.framesSent, framePosition);
    
   return res;
-  }
+}
 
 
 
@@ -261,68 +273,11 @@ int sendControl(){
 }
 
 
-void data_currentMachine(enum state* current, unsigned char buf) {
-  unsigned char control_byte;
-
-	switch(*current) {
-		case START:
-			if(buf == FLAG){
-				*current = READ_FLAG;
-			}
-      else *current=START;
-			break;
-		case READ_FLAG:
-				if(buf == CONTROL) *current = READ_CONTROL;
-        else if(buf==FLAG)
-					*current = READ_FLAG;
-				else
-					*current= START;
-			break;
-		case READ_CONTROL: 
-				if((buf == C0) || (buf == C1)){
-          control_byte = buf;
-          *current=READ_BCC;
-        }
-				else if(buf==FLAG)
-
-					*current=READ_FLAG;
-				else
-					*current=START;
-			break;
-		case READ_BCC: 
-				if(buf == BCC(CONTROL, control_byte)) *current=BCC_OK;
-        else if (buf==FLAG) *current=READ_FLAG;
-				else
-					*current=START;
-      break;
-    case BCC_OK:
-      if(buf!=FLAG){
-        *current = DATA;
-        return;
-      }
-      else *current=START;
-            
-      break;
-
-    case DATA:
-      if(buf==FLAG){
-        *current = STOP;
-        return;
-			}  
-      break;
-
-    case STOP:
-      break;
-		default:
-			break;
-	}
-}
-
-
 int llread(int fd, unsigned char* packet){
   unsigned char frame[MAX_FRAME_SIZE];
-  int frame_length = readFrame(fd, frame);
-  
+  unsigned char control_field = 0x00;
+  int frame_length = readFrame(fd, frame, &control_field);
+  //VErify data?????????????????????????????????????????????
   if(frame_length == -1) return -1;
   //destuff frame
   unsigned char final_frame[frame_length];
@@ -335,20 +290,20 @@ int llread(int fd, unsigned char* packet){
 					packet_length++;
 	}
   //send proper response
-  //TO-DO
+  // if(control_field == )
 
   return frame_length;
 }
 
 
-int readFrame(int fd, unsigned char* frame){
+int readFrame(int fd, unsigned char* frame, unsigned char* control_field){
   enum state current = START;
   unsigned char byte_read;
   int position = 0;
 
   while (current != STOP){
     int frame_size = read(fd, &byte_read, 1);
-    data_currentMachine(&current, byte_read);
+    control_field = COM_currentMachine(&current, byte_read);
     frame[position++] = byte_read;
   }
   link_control.framesReceived++;
@@ -374,5 +329,32 @@ int  destuffFrame(unsigned char* frame, int frame_length, unsigned char* final_f
   }
   final_frame[j++] = frame[i++];
   return j;
+}
+
+int readResponse(int fd){
+  unsigned char byte_read, control_field;
+  current = START;
+
+  while(current != STOP){
+    read(fd, &byte_read, 1);
+    control_field = COM_currentMachine(&current, byte_read);
+  }
+
+  if(control_field == C_R0 && link_control.N_s == 0){
+    link_control.RRreceived++;
+    printf("[INFO]\n  Received RR #%d\n", link_control.RRreceived);
+    return 0;
+  }
+  else if(control_field == C_R1 && link_control.N_s == 1){
+    link_control.RRreceived++;
+    printf("[INFO]\n  Received RR #%d\n", link_control.RRreceived);
+    return 0;
+  }
+  else{
+    link_control.RJreceived++;
+    printf("[INFO]\n  Received REJ #%d\n", link_control.RJreceived);
+    return -1;
+  }
+
 }
 

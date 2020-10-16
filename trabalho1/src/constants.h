@@ -19,6 +19,11 @@
 #define END_CONTROL 0x03
 #define BCC(X, Y) (X) ^ (Y)
 
+#define C_R0	0x05
+#define C_R1	0x85
+#define C_REJ0	0x81
+#define C_REJ1	0x01
+
 #define C0 0x00
 #define C1 0x40
 #define BYTE_STUFF 0x20
@@ -31,7 +36,6 @@
 
 #define TIMEOUT 3
 #define MAX_TRIES 3
-
 
 #define RECEIVER 2
 #define SENDER 1
@@ -48,10 +52,10 @@ typedef struct{
 
 enum phase{
   OPENING_CONNECTION,
-  OPEN_CONTROL_PACKET,
   SENDING_DATA,
-  CLOSING_CONTROL_PACKET,
-  CLOSINGCONNECTION
+  CLOSING_CONNECTION
 };
 
 int fd;
+
+

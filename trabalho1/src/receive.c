@@ -31,7 +31,7 @@ int main(int argc, char** argv)
     // }
 
     printf("      -->RECEIVER<--\n");
-
+    link_phase = OPENING_CONNECTION;
     fd = llopen(RECEIVER);
     if(fd == -1){
       perror("[ERROR] Could not establish connection\n");
@@ -41,16 +41,18 @@ int main(int argc, char** argv)
     printf("[CONNECTION ONLINE]\n");
 
    
+
     /*    +++++++DATA Receiving+++++++++++++++   */
  
     //receive start control packet
+    link_phase = OPENING_CONNECTION;
+    link_control.N_s = 0;
     if(readControlPacket() == -1){
       perror("[ERROR]\n Error reading start control packet\n");
       exit(-1);
     }
 
     //receive data packets
-
 
     /*    +++++++++++++++++++++++++++++++++++   */
 

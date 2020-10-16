@@ -33,18 +33,20 @@ void atende()       // atende alarme
 	if(conta <= MAX_TRIES){
 		switch(link_phase){
 			case OPENING_CONNECTION:
-			    printf("#%d: Return message not received, waiting 3 more seconds..\n", conta);
+			    printf("[TIMEOUT]\n  #%d: Return message not received\n", conta);
 				sendControl();    
 				conta++;
 				break;
-			case OPEN_CONTROL_PACKET:
+			case SENDING_DATA:
+				printf("[TIMEOUT]\n  #%d: TimeOut reached\n", conta);
+				conta++;
 				break;
 			default:
 				break;
 		}
   	}
   	else{
-    	printf("[EXITING]\n Max timeout reached, aborting\n");
+    	printf("[EXITING]\n  Reached max timeout tries, aborting\n");
     	exit(-1);
   	}
   	setAlarm(TIMEOUT);
