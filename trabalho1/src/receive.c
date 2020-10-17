@@ -23,6 +23,7 @@ int main(int argc, char** argv)
 {
     int fd,c, res;
     struct termios oldtio,newtio;
+    unsigned char packet[MAX_FRAME_SIZE + DATA_PACKET_SIZE];
     // if ( (argc < 2) ||
   	//      ((strcmp("/dev/ttyS10", argv[1])!=0) &&
   	//       (strcmp("/dev/ttyS11", argv[1])!=0) )) {
@@ -41,7 +42,6 @@ int main(int argc, char** argv)
     printf("[CONNECTION ONLINE]\n");
 
    
-
     /*    +++++++DATA Receiving+++++++++++++++   */
  
     //receive start control packet
@@ -51,9 +51,11 @@ int main(int argc, char** argv)
       perror("[ERROR]\n Error reading start control packet\n");
       exit(-1);
     }
-
+    printf("[INFO]\n  Ready to receive data\n");
     //receive data packets
+    // if(llread(fd, ) != 0){
 
+    // }
     /*    +++++++++++++++++++++++++++++++++++   */
 
 
@@ -68,11 +70,17 @@ int main(int argc, char** argv)
 int readControlPacket(){
   unsigned char packet[MAX_FRAME_SIZE];
   int res = llread(fd, packet);
-  if(res == -1) return -1;
+  if(res == -1){
+    printf("debug in readcontrol packet res=%d\n", res);
+    return -1;
+  } 
   
   int index = 1; //after flag
   int file_size = 0;
-  if(! packet[index] == FILE_SIZE_FIELD) return -1;
+
+  if( packet[index] != FILE_SIZE_FIELD){
+    return -1;
+  } 
   else{
       index++;
       int file_size_length = packet[index++];
@@ -81,7 +89,7 @@ int readControlPacket(){
    	   file_size += packet[index++] << 8 * (file_size_length - 1 - i);
       }
   }
-  if(! packet[index] == FILE_NAME_FIELD) return -1;
+  if( packet[index] != FILE_NAME_FIELD) return -1;
   else{
       index++;
       int name_length = packet[index++];

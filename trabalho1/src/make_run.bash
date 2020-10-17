@@ -1,6 +1,6 @@
 #!/bin/bash
 
-make
+make -B
 
 gnome-terminal -x sh -c "./receive /dev/ttyS11; bash"
 

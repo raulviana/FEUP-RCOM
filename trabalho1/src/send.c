@@ -16,8 +16,8 @@
 #include "alarm.h"
 
 extern enum phase link_phase;
-
 int fd;
+
 
 int sendControlPacket(int fd, int control_type, FileInfo FileInfo);
 
@@ -25,7 +25,6 @@ int main(int argc, char** argv)
 {
     int c, res;
     struct termios oldtio,newtio;
-    char buf[255];
     // if ( (argc < 2) ||
   	//      ((strcmp("/dev/ttyS10", argv[1])!=0) &&
   	//       (strcmp("/dev/ttyS11", argv[1])!=0) )) {
@@ -76,8 +75,9 @@ int main(int argc, char** argv)
       exit(-1);
     }
 
-    //send data packets
 
+
+    //send data packets
 
     //construct and send closing control packet
     // if(sendControlPacket(fd, END_CONTROL, fileInfo) == -1){
@@ -121,6 +121,7 @@ int sendControlPacket(int fd, int control_type, FileInfo fileInfo){
   for (int i = 0; i < strlen(fileInfo.send_fileName); i++){
     packet[index++] = fileInfo.send_fileName[i];
   }
+  link_control.N_s = 0;
   int res = llwrite(fd, packet, index);
   if (res == -1){
     return -1;

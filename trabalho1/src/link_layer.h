@@ -1,5 +1,10 @@
 #pragma once
 
+#include "constants.h"
+
+#define SENDER 1
+#define RECEIVER 2
+
 enum state {
  	START,
  	READ_FLAG,
@@ -14,6 +19,8 @@ typedef struct {
 	unsigned int N_s;
 	unsigned int framesSent;
 	unsigned int framesReceived;
+	unsigned int RRsent;
+	unsigned int RJsent;
 	unsigned int RRreceived;
 	unsigned int RJreceived;
 }Link_control;
@@ -35,11 +42,14 @@ int llwrite(int fd, unsigned char packet[], int index);
 int sendControl();
 
 unsigned char COM_currentMachine(enum state* current, unsigned char buf);
+void data_currentMachine(enum state* current, unsigned char buf);
 
 int llread(int fd, unsigned char* packet);
 
-int readFrame(int fd, unsigned char* frame, unsigned char* control_field);
+int readFrame(int fd, unsigned char* frame);
 
 int  destuffFrame(unsigned char* frame, int frame_length, unsigned char* final_frame);
 
 int readResponse(int fd);
+
+int confirmIntegrity(unsigned char* final_frame, int final_frame_length);

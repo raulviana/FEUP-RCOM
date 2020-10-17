@@ -1,11 +1,15 @@
+#pragma once 
 
 #define FILENAME "test.txt"   // "pinguim.gif"
 #define SENDER_PORT "/dev/ttyS10"
 #define RECEIVER_PORT "/dev/ttyS11"
 
+#define _POSIX_SOURCE 1 /* POSIX compliant source */
 #define BAUDRATE B38400
 #define MAX_FRAME_SIZE 512
-#define _POSIX_SOURCE 1 /* POSIX compliant source */
+#define CONTROL_SIZE 5
+#define DATA_PACKET_SIZE 4
+
 
 #define FALSE 0
 #define TRUE 1
@@ -29,7 +33,6 @@
 #define BYTE_STUFF 0x20
 #define ESC 0x7d
 
-#define CONTROL_SIZE 5
 #define FILE_SIZE_FIELD 0x00
 #define FILE_NAME_FIELD 0x01
 
