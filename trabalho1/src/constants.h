@@ -6,7 +6,8 @@
 
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 #define BAUDRATE B38400
-#define MAX_FRAME_SIZE 512
+#define MAX_FRAME_SIZE 1024
+#define MAX_CHUNK_SIZE 512
 #define CONTROL_SIZE 5
 #define DATA_PACKET_SIZE 4
 
@@ -35,6 +36,7 @@
 
 #define FILE_SIZE_FIELD 0x00
 #define FILE_NAME_FIELD 0x01
+#define DATA_FIELD 0x01
 
 
 #define TIMEOUT 3
@@ -47,7 +49,7 @@ extern struct termios oldtio,newtio;
 
 typedef struct{
     char* send_fileName;
-    char* receive_fleName;
+    char* receive_fileName;
     int open_fd;
     int close_fd;
     int fileSize;

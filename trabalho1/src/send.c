@@ -20,6 +20,7 @@ int fd;
 
 
 int sendControlPacket(int fd, int control_type, FileInfo FileInfo);
+int sendFile(FileInfo fileInfo);
 
 int main(int argc, char** argv)
 {
@@ -72,18 +73,20 @@ int main(int argc, char** argv)
     link_control.N_s = 0;
     if(sendControlPacket(fd, START_CONTROL, fileInfo) == -1){
       perror("[ERROR]\n Error sending start control packet\n");
-      exit(-1);
+      exit(1);
     }
 
-
-
-    //send data packets
-
+    //send file
+    link_phase = SENDING_DATA;
+    if(sendFile(fileInfo) == -1){
+      printf("[ERROR]\n  Error in llwrite\n");
+      exit(2);
+    }
     //construct and send closing control packet
-    // if(sendControlPacket(fd, END_CONTROL, fileInfo) == -1){
-    //   perror("[ERROR]\n Error sending ending control packet\n");
-    //   exit(-1);
-    // }
+    if(sendControlPacket(fd, END_CONTROL, fileInfo) == -1){
+      perror("[ERROR]\n Error sending ending control packet\n");
+      exit(-1);
+    }
 
     /*    +++++++++++++++++++++++++++++++++++   */
 
@@ -127,6 +130,37 @@ int sendControlPacket(int fd, int control_type, FileInfo fileInfo){
     return -1;
   }
   return 0;
+}
+
+int sendFile(FileInfo fileInfo){
+  unsigned char buffer[MAX_CHUNK_SIZE];
+  unsigned int chunks_sent = 0;
+  unsigned int chunks_to_send = fileInfo.fileSize / MAX_CHUNK_SIZE + (fileInfo.fileSize % MAX_CHUNK_SIZE != 0); //se na divisão pelo tamanho máximo sobrarem bytes é necessário adicionar mais um chunk com menos bytes do que o tamanho máximo 
+
+  unsigned int byte_read = 0;
+  unsigned int bytes_written = 0;
+  unsigned int total = 0;
+
+  printf("[INFO]\n  Sending file %s in %d splited parts\n", FILENAME, chunks_to_send);
+  
+  while(chunks_sent < chunks_to_send){
+    byte_read = read(fileInfo.open_fd, &buffer, MAX_CHUNK_SIZE);
+    unsigned char packet[DATA_PACKET_SIZE + byte_read];
+
+    //construct packet
+    // [C, N, L2, L1, P1, ..., Pk]
+    packet[0] = DATA_FIELD;
+    packet[1] = chunks_sent % 255;
+    packet[2] = byte_read / 256;
+    packet[3] = byte_read % 256; //última posição é 256 * L2 + L1
+    memcpy(&packet[4], &buffer, byte_read); //coloca o conteudo do buffer nas posições seguintes do packet
+
+    bytes_written = llwrite(fd, packet,byte_read + DATA_PACKET_SIZE);
+    if(bytes_written == -1)return -1;
+    total += bytes_written;
+    chunks_sent++; 
+  }
+  printf("[INFO]\n  Send %d data bytes in %d chunks\n", total - DATA_PACKET_SIZE * chunks_sent,total);
 }
 
 

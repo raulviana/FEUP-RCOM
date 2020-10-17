@@ -15,14 +15,19 @@
 
 
 extern enum phase link_phase;
+FileInfo fileInfo;
 
 int check_bcc1(char control_message[], int size);
 int readControlPacket();
+int receiveFile(FileInfo fileInfo);
+void processData(unsigned char* packet, FileInfo fileInfo);
 
 int main(int argc, char** argv)
 {
     int fd,c, res;
     struct termios oldtio,newtio;
+    bzero(&fileInfo, sizeof(fileInfo));
+    
     unsigned char packet[MAX_FRAME_SIZE + DATA_PACKET_SIZE];
     // if ( (argc < 2) ||
   	//      ((strcmp("/dev/ttyS10", argv[1])!=0) &&
@@ -47,17 +52,20 @@ int main(int argc, char** argv)
     //receive start control packet
     link_phase = OPENING_CONNECTION;
     link_control.N_s = 0;
+    printf("before readcontrol packet file_fd: %d\n", fileInfo.close_fd);
     if(readControlPacket() == -1){
       perror("[ERROR]\n Error reading start control packet\n");
-      exit(-1);
+      exit(1);
     }
     printf("[INFO]\n  Ready to receive data\n");
+    printf("after readcontrol file_fd: %d\n", fileInfo.close_fd);
     //receive data packets
-    // if(llread(fd, ) != 0){
-
-    // }
+    link_phase = SENDING_DATA;
+    if(receiveFile(fileInfo) == -1){
+      printf("[ERROR]\n  Error in llread\n");
+      exit(2);
+    }
     /*    +++++++++++++++++++++++++++++++++++   */
-
 
     llclose(fd, RECEIVER);
     printf("[CONNECTION CLOSED]\n");
@@ -71,7 +79,6 @@ int readControlPacket(){
   unsigned char packet[MAX_FRAME_SIZE];
   int res = llread(fd, packet);
   if(res == -1){
-    printf("debug in readcontrol packet res=%d\n", res);
     return -1;
   } 
   
@@ -98,9 +105,50 @@ int readControlPacket(){
    	   file_name[i] = packet[index++];
       }
       file_name[name_length] = '\0';
+      //testing
+      file_name[0] = '1';
+      //
+      fileInfo.receive_fileName = file_name;
+      fileInfo.close_fd = open(fileInfo.receive_fileName, O_RDWR | O_CREAT , 777);
+      printf("file_fd: %d\n", fileInfo.close_fd);
       printf("[INFO]\n Prepared to receive file: %s with size: %d\n", file_name, file_size);
   }
  return 0;
 }
+
+int receiveFile(FileInfo fileInfo){
+  unsigned char max_buf[MAX_CHUNK_SIZE + DATA_PACKET_SIZE];
+
+  unsigned int bytes_read = 0;
+  unsigned int received = 0;
+  int aux = 0;
+  while(! received){
+    if((aux = llread(fd, max_buf)) != 0){
+      bytes_read += aux;
+      
+      if(max_buf[0] == DATA_FIELD) {
+        processData(max_buf, fileInfo);
+      }
+      else if(max_buf[0] == END_CONTROL){
+        received = 1;
+        break;
+      }
+    }
+  }
+  close(fileInfo.close_fd);
+  return 0;
+}
+
+
+void processData(unsigned char* packet, FileInfo fileInfo){
+
+	int dataSize = 256 * packet[2] + packet[3];
+	printf("[INFO]\n  writing to disk %d bytes\n\n", dataSize);
+  
+  printf("fileFD  : %d\n", fileInfo.close_fd);
+	int res = write(fileInfo.close_fd, &packet[4], dataSize);
+  printf("res: %d\n", res);
+}
+
 
 

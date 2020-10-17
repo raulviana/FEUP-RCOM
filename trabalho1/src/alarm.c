@@ -38,16 +38,19 @@ void atende()       // atende alarme
 				conta++;
 				break;
 			case SENDING_DATA:
-				printf("[TIMEOUT]\n  #%d: TimeOut reached\n", conta);
+				printf("[TIMEOUT]\n  #%d: No response packet\n", conta);
 				conta++;
 				break;
+			case CLOSING_CONNECTION:
+				printf("[TIMEOUT]\n  #d: No DISC received\n");
+				conta++;
 			default:
 				break;
 		}
   	}
   	else{
     	printf("[EXITING]\n  Reached max timeout tries, aborting\n");
-    	exit(-1);
+    	exit(5);
   	}
   	setAlarm(TIMEOUT);
 }
