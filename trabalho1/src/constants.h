@@ -1,6 +1,6 @@
 #pragma once 
 
-#define FILENAME "test.txt"   // "pinguim.gif"
+#define FILENAME "pinguim.gif"   // "pinguim.gif"
 #define SENDER_PORT "/dev/ttyS10"
 #define RECEIVER_PORT "/dev/ttyS11"
 

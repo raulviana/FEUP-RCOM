@@ -70,7 +70,7 @@ int main(int argc, char** argv)
 
     //construct and send opening control packet
     link_phase = SENDING_DATA;
-    link_control.N_s = 0;
+    link_control.N_s = 1;
     if(sendControlPacket(fd, START_CONTROL, fileInfo) == -1){
       perror("[ERROR]\n Error sending start control packet\n");
       exit(1);
@@ -78,6 +78,7 @@ int main(int argc, char** argv)
 
     //send file
     link_phase = SENDING_DATA;
+    link_control.N_s = 1;
     if(sendFile(fileInfo) == -1){
       printf("[ERROR]\n  Error in llwrite\n");
       exit(2);
@@ -124,7 +125,6 @@ int sendControlPacket(int fd, int control_type, FileInfo fileInfo){
   for (int i = 0; i < strlen(fileInfo.send_fileName); i++){
     packet[index++] = fileInfo.send_fileName[i];
   }
-  link_control.N_s = 0;
   int res = llwrite(fd, packet, index);
   if (res == -1){
     return -1;
@@ -141,7 +141,7 @@ int sendFile(FileInfo fileInfo){
   unsigned int bytes_written = 0;
   unsigned int total = 0;
 
-  printf("[INFO]\n  Sending file %s in %d splited parts\n", FILENAME, chunks_to_send);
+  printf("[INFO]\n  Sending file %s with %d bytes in %d splited parts\n", FILENAME, fileInfo.fileSize, chunks_to_send);
   
   while(chunks_sent < chunks_to_send){
     byte_read = read(fileInfo.open_fd, &buffer, MAX_CHUNK_SIZE);
@@ -160,7 +160,7 @@ int sendFile(FileInfo fileInfo){
     total += bytes_written;
     chunks_sent++; 
   }
-  printf("[INFO]\n  Send %d data bytes in %d chunks\n", total - DATA_PACKET_SIZE * chunks_sent,total);
+  printf("[INFO]\n  Sent %d data bytes in %d chunks\n", total - DATA_PACKET_SIZE * chunks_sent,chunks_sent);
 }
 
 

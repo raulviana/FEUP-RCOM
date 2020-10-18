@@ -170,7 +170,7 @@ unsigned char COM_currentMachine(enum state* current, unsigned char buf){
 			break;
 
 			case READ_CONTROL: 
-				if((buf == CONTROL_SET) || (buf == CONTROL_UA) || (buf = CONTROL_DISC)){
+				if((buf == CONTROL_SET) || (buf == CONTROL_UA) || (buf = CONTROL_DISC) || (buf == C0) || (buf == C1)){
           control_byte = buf;
           *current=READ_BCC;
         }
@@ -271,6 +271,8 @@ int closeConnection(int fd){
 
 
 int llwrite(int fd, unsigned char packet[], int packet_size){
+  if(link_control.N_s == 0) link_control.N_s = 1;
+  else link_control.N_s = 0;
   //compose frame
   //frame: [F, A, C, BCC1, [packet], BCC2, F]
   unsigned char frame[2 * packet_size + 6]; // 6 = F+A+C+BCC1+BCC2+F || 2*packet para assegurar que existe espaço suficiente para byte stuffing 
@@ -303,17 +305,20 @@ int llwrite(int fd, unsigned char packet[], int packet_size){
   frame[framePosition++] = bcc2;
   frame[framePosition++] = FLAG;
 
-  unsigned int continueFlag = FALSE;
+  unsigned int continueFlag = TRUE;
   int res;
   do{
     setAlarm(TIMEOUT);
+    printf("[INFO]\n  Sending frame %d\n", link_control.framesSent);
     res = write(fd, frame, framePosition);
     if(readResponse(fd) == -1){ //Received REJ, have to resend frame
-      cancelAlarm();
-      continueFlag= FALSE;
+      printf("received REJ, resending package\n");
       continue;
     }
-    else continueFlag = TRUE;
+    else {
+      cancelAlarm();
+      continueFlag = FALSE;
+    } 
   }while( continueFlag);
 
   link_control.framesSent++;
@@ -353,7 +358,7 @@ int llread(int fd, unsigned char* packet){
     control_field = frame[2];
     // //confirm data Integrity
     if(! confirmIntegrity(final_frame, final_frame_length)){
-      printf("[ERROR]\n  Wrong packet, asking the rigth one\n");
+      printf("[ERROR]\n  Packet with error, asking re-emission\n");
       if(control_field == C0){
         write(fd, REJ1, sizeof(REJ1));
         link_control.RJsent++;
@@ -436,14 +441,18 @@ int readResponse(int fd){
 
   while(current != STOP){
     read(fd, &byte_read, 1);
-    control_field = COM_currentMachine(&current, byte_read);
+    COM_currentMachine(&current, byte_read);
+    if(current == READ_BCC){
+      control_field = byte_read;
+    }
   }
-  if(control_field == C_R0 && link_control.N_s == 0){
+  printf("controlfield niresponse: %4X  N_s: %d\n", control_field, link_control.N_s);
+  if(control_field == C_R0 && link_control.N_s == 1){
     link_control.RRreceived++;
     printf("[INFO]\n  Received RR #%d\n", link_control.RRreceived);
     return 0;
   }
-  else if(control_field == C_R1 && link_control.N_s == 1){
+  else if(control_field == C_R1 && link_control.N_s == 0){
     link_control.RRreceived++;
     printf("[INFO]\n  Received RR #%d\n", link_control.RRreceived);
     return 0;
@@ -460,7 +469,7 @@ int confirmIntegrity(unsigned char* final_frame, int final_frame_length){
   unsigned char adress_field = final_frame[1];
   unsigned char control_field = final_frame[2];
   unsigned char BCC1 = final_frame[3];
-
+//TO DO review possible errors
   if((BCC1 == BCC(adress_field, control_field)) && (control_field == C0 || control_field == C1)){
   //calculate expected bcc2 ( data packet is between 4 and size - 2 of frame)
     unsigned char expected_bcc2 = 0x00;

@@ -52,13 +52,11 @@ int main(int argc, char** argv)
     //receive start control packet
     link_phase = OPENING_CONNECTION;
     link_control.N_s = 0;
-    printf("before readcontrol packet file_fd: %d\n", fileInfo.close_fd);
     if(readControlPacket() == -1){
       perror("[ERROR]\n Error reading start control packet\n");
       exit(1);
     }
     printf("[INFO]\n  Ready to receive data\n");
-    printf("after readcontrol file_fd: %d\n", fileInfo.close_fd);
     //receive data packets
     link_phase = SENDING_DATA;
     if(receiveFile(fileInfo) == -1){
@@ -109,8 +107,8 @@ int readControlPacket(){
       file_name[0] = '1';
       //
       fileInfo.receive_fileName = file_name;
+      remove(fileInfo.receive_fileName);
       fileInfo.close_fd = open(fileInfo.receive_fileName, O_RDWR | O_CREAT , 777);
-      printf("file_fd: %d\n", fileInfo.close_fd);
       printf("[INFO]\n Prepared to receive file: %s with size: %d\n", file_name, file_size);
   }
  return 0;
@@ -124,6 +122,9 @@ int receiveFile(FileInfo fileInfo){
   int aux = 0;
   while(! received){
     if((aux = llread(fd, max_buf)) != 0){
+
+      printf("[INFO]\n  Received packet #%d\n", link_control.framesReceived);
+      
       bytes_read += aux;
       
       if(max_buf[0] == DATA_FIELD) {
@@ -143,11 +144,10 @@ int receiveFile(FileInfo fileInfo){
 void processData(unsigned char* packet, FileInfo fileInfo){
 
 	int dataSize = 256 * packet[2] + packet[3];
+
 	printf("[INFO]\n  writing to disk %d bytes\n\n", dataSize);
   
-  printf("fileFD  : %d\n", fileInfo.close_fd);
 	int res = write(fileInfo.close_fd, &packet[4], dataSize);
-  printf("res: %d\n", res);
 }
 
 
