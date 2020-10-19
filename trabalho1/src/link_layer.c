@@ -424,16 +424,17 @@ int  destuffFrame(unsigned char* frame, int frame_length, unsigned char* final_f
   int j = 4, i = 4;
 
   while(i < frame_length - 1){
-    if(frame[i] == ESC){
+    if(frame[i] != ESC){
+      final_frame[j++] = frame[i];
+    }
+    else{
       i++;
       if(frame[i] == (FLAG ^ BYTE_STUFF)) final_frame[j++] = FLAG;
       else if (frame[i] == (ESC ^ BYTE_STUFF)) final_frame[j++] = ESC;
     }
-    else {final_frame[j++] = frame[i];}
-
     i++;
   }
-  
+
   final_frame[j++] = frame[i++];
   
   return j;
@@ -473,7 +474,7 @@ int confirmIntegrity(unsigned char* final_frame, int final_frame_length){
   unsigned char adress_field = final_frame[1];
   unsigned char control_field = final_frame[2];
   unsigned char BCC1 = final_frame[3];
-//TO DO review possible errors
+
   if((BCC1 == BCC(adress_field, control_field)) && (control_field == C0 || control_field == C1)){
   //calculate expected bcc2 ( data packet is between 4 and size - 2 of frame)
     unsigned char expected_bcc2 = 0;
