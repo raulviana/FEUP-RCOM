@@ -1,13 +1,13 @@
 #pragma once 
 
-#define FILENAME "pinguim.gif"   // "pinguim.gif"
+#define FILENAME "state.pdf"   // "pinguim.gif"
 #define SENDER_PORT "/dev/ttyS10"
 #define RECEIVER_PORT "/dev/ttyS11"
 
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 #define BAUDRATE B38400
 #define MAX_FRAME_SIZE 1024
-#define MAX_CHUNK_SIZE 512
+#define MAX_CHUNK_SIZE 256
 #define CONTROL_SIZE 5
 #define DATA_PACKET_SIZE 4
 

@@ -79,6 +79,10 @@ int main(int argc, char** argv)
     //send file
     link_phase = SENDING_DATA;
     link_control.N_s = 1;
+    link_control.RJreceived =0;
+    link_control.RJsent = 0;
+    link_control.RRreceived =0;
+    link_control.RRsent = 0;
     if(sendFile(fileInfo) == -1){
       printf("[ERROR]\n  Error in llwrite\n");
       exit(2);

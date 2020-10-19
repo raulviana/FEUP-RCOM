@@ -28,6 +28,7 @@ struct termios newtio, oldtio;
 enum state current;
 Link_control link_control;
 extern int fd;
+extern int conta;
 
 
 int llopen(int type){
@@ -273,56 +274,68 @@ int closeConnection(int fd){
 int llwrite(int fd, unsigned char packet[], int packet_size){
   if(link_control.N_s == 0) link_control.N_s = 1;
   else link_control.N_s = 0;
-  //compose frame
-  //frame: [F, A, C, BCC1, [packet], BCC2, F]
-  unsigned char frame[2 * packet_size + 6]; // 6 = F+A+C+BCC1+BCC2+F || 2*packet para assegurar que existe espaço suficiente para byte stuffing 
-  //frame header
-  frame[0] = FLAG;
-  frame[1] = CONTROL;
-  if(link_control.N_s == 0) frame[2] = C0;
-  else frame[2] = C1;
-  frame[3] = BCC(CONTROL, frame[2]);
-
-  //process data
-  unsigned int framePosition = 4;
-  unsigned int packetPosition = 0;
-  unsigned char current_packet_char;
-  while(packetPosition < packet_size){
-    current_packet_char = packet[packetPosition++];
-
-    if(current_packet_char == FLAG || current_packet_char == ESC){
-      frame[framePosition++] = ESC;
-      frame[framePosition++] = current_packet_char ^ BYTE_STUFF;
-    }
-    else frame[framePosition++] = current_packet_char;
-
-  } 
-  unsigned char bcc2 = 0x00;
-  for (int i = 0; i < packet_size; i++){//packing packet in frame
-    bcc2 ^= packet[i];
-  }
-  //frame footer
-  frame[framePosition++] = bcc2;
-  frame[framePosition++] = FLAG;
 
   unsigned int continueFlag = TRUE;
   int res;
+  unsigned int framePosition;;
+  unsigned int tries = 0;
+  unsigned char frame[2 * packet_size + 6]; // 6 = F+A+C+BCC1+BCC2+F || 2*packet para assegurar que existe espaço suficiente para byte stuffing 
+   
   do{
+    if(tries >= MAX_TRIES){
+      printf("[ERROR]\n  Max tries reached, aborting\n");
+      return -1;
+    }
+    framePosition = 4;
+    //compose frame
+    //frame: [F, A, C, BCC1, [packet], BCC2, F]
+    //frame header
+    frame[0] = FLAG;
+    frame[1] = CONTROL;
+    if(link_control.N_s == 0) frame[2] = C0;
+    else frame[2] = C1;
+    frame[3] = BCC(CONTROL, frame[2]);
+
+    //process data
+    
+    unsigned int packetPosition = 0;
+    unsigned char current_packet_char;
+    while(packetPosition < packet_size){
+      current_packet_char = packet[packetPosition++];
+
+      if(current_packet_char == FLAG || current_packet_char == ESC){
+        frame[framePosition++] = ESC;
+        frame[framePosition++] = current_packet_char ^ BYTE_STUFF;
+      }
+      else frame[framePosition++] = current_packet_char;
+
+    } 
+    unsigned char bcc2 = 0;
+    for (int i = 0; i < packet_size; i++){//packing packet in frame
+      bcc2 ^= packet[i];
+    }
+    //frame footer
+    frame[framePosition++] = bcc2;
+    frame[framePosition++] = FLAG;
+    printf("bbc2: %4X\n", frame[framePosition - 2]);
+    for(int i = 0; i < framePosition; i++){
+      printf("%4X  ", frame[i]);
+    }
     setAlarm(TIMEOUT);
-    printf("[INFO]\n  Sending frame %d\n", link_control.framesSent);
     res = write(fd, frame, framePosition);
     if(readResponse(fd) == -1){ //Received REJ, have to resend frame
-      printf("received REJ, resending package\n");
+      cancelAlarm();
+      bzero(&frame, framePosition);
+       printf("[ALERT]\n Re-sending frame number %d with size %d\n", link_control.framesSent, framePosition);
+      tries++;
       continue;
     }
     else {
       cancelAlarm();
       continueFlag = FALSE;
-    } 
+    }
   }while( continueFlag);
-
   link_control.framesSent++;
-
   printf("[INFO]\n Sent frame number %d with size %d\n", link_control.framesSent, framePosition);
    
   return res;
@@ -416,6 +429,7 @@ int readFrame(int fd, unsigned char* frame){
 
 
 int  destuffFrame(unsigned char* frame, int frame_length, unsigned char* final_frame){
+
   final_frame[0] = frame[0];
   final_frame[1] = frame[1];
   final_frame[2] = frame[2];
@@ -451,7 +465,6 @@ int readResponse(int fd){
       control_field = byte_read;
     }
   }
-  printf("controlfield niresponse: %4X  N_s: %d\n", control_field, link_control.N_s);
   if(control_field == C_R0 && link_control.N_s == 1){
     link_control.RRreceived++;
     printf("[INFO]\n  Received RR #%d\n", link_control.RRreceived);
@@ -482,6 +495,10 @@ int confirmIntegrity(unsigned char* final_frame, int final_frame_length){
       expected_bcc2 ^= final_frame[i]; 
     }
     unsigned char bcc2 = final_frame[final_frame_length - 2];
+    printf("receivedbcc: %4X  expected bcc: %4X\n", bcc2, expected_bcc2);
+    for (int i = 0; i < final_frame_length; i++){
+      printf("%4X ", final_frame[i]);
+    }
     if(bcc2 != expected_bcc2){
       printf("[ERROR]\n  Error in bcc2\n");
       return FALSE;

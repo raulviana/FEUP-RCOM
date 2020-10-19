@@ -59,6 +59,10 @@ int main(int argc, char** argv)
     printf("[INFO]\n  Ready to receive data\n");
     //receive data packets
     link_phase = SENDING_DATA;
+    link_control.RJreceived =0;
+    link_control.RJsent = 0;
+    link_control.RRreceived =0;
+    link_control.RRsent = 0;
     if(receiveFile(fileInfo) == -1){
       printf("[ERROR]\n  Error in llread\n");
       exit(2);
@@ -144,8 +148,6 @@ int receiveFile(FileInfo fileInfo){
 void processData(unsigned char* packet, FileInfo fileInfo){
 
 	int dataSize = 256 * packet[2] + packet[3];
-
-	printf("[INFO]\n  writing to disk %d bytes\n\n", dataSize);
   
 	int res = write(fileInfo.close_fd, &packet[4], dataSize);
 }
