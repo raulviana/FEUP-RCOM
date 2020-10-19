@@ -300,6 +300,7 @@ int llwrite(int fd, unsigned char packet[], int packet_size){
     
     unsigned int packetPosition = 0;
     unsigned char current_packet_char;
+
     while(packetPosition < packet_size){
       current_packet_char = packet[packetPosition++];
 
@@ -315,7 +316,11 @@ int llwrite(int fd, unsigned char packet[], int packet_size){
       bcc2 ^= packet[i];
     }
     //frame footer
-    frame[framePosition++] = bcc2;
+    if(bcc2 == FLAG || bcc2 == ESC){
+      frame[framePosition++] = ESC;
+      frame[framePosition++] = bcc2 ^ BYTE_STUFF;
+    }
+    else frame[framePosition++] = bcc2;
     frame[framePosition++] = FLAG;
     printf("bbc2: %4X\n", frame[framePosition - 2]);
     for(int i = 0; i < framePosition; i++){
