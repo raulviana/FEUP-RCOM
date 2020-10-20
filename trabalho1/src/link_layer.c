@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <strings.h>
+#include <time.h>
 
 unsigned char SET[5] = { FLAG, CONTROL, CONTROL_SET, BCC(CONTROL, CONTROL_SET), FLAG};
 unsigned char UA[5] = {FLAG, CONTROL, CONTROL_UA, BCC(CONTROL, CONTROL_UA), FLAG};
@@ -30,6 +31,7 @@ Link_control link_control;
 extern int fd;
 extern int conta;
 
+int contador = 0;
 
 int llopen(int type){
 
@@ -362,9 +364,6 @@ int llread(int fd, unsigned char* packet){
     if(frame_length == -1){
       return -1;
     } 
-    
-    //VErify data?????????????????????????????????????????????
-
   
     // destuff frame
     unsigned char final_frame[frame_length];
@@ -393,6 +392,7 @@ int llread(int fd, unsigned char* packet){
         packet[packet_length] = final_frame[i];
         packet_length++;
       }
+      nanosleep((const struct timespec[]){{0, T_PROP}}, NULL);
       // //send proper response()
       if(control_field == C1){
         write(fd, RR0, sizeof(RR0));
