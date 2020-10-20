@@ -1,13 +1,17 @@
 #pragma once 
 
-#define FILENAME "tanenb.pdf"   // "pinguim.gif"
+/******** Alterável *************/
+#define FILENAME "pinguim.gif"   // "pinguim.gif"
 #define SENDER_PORT "/dev/ttyS10"
 #define RECEIVER_PORT "/dev/ttyS11"
+#define BAUDRATE B38400
+#define MAX_CHUNK_SIZE 21 //min 56.. tem de caber o nome do ficheiro e o seu tamanho no pacote de controlo
+/********************************/
 
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
-#define BAUDRATE B38400
-#define MAX_FRAME_SIZE 1024
-#define MAX_CHUNK_SIZE 512
+
+#define MAX_FRAME_SIZE 2 * MAX_CHUNK_SIZE
+
 #define CONTROL_SIZE 5
 #define DATA_PACKET_SIZE 4
 

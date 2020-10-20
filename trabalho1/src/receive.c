@@ -130,13 +130,11 @@ int receiveFile(FileInfo fileInfo){
       printf("[INFO]\n  Received packet #%d\n", link_control.framesReceived);
       
       bytes_read += aux;
-      
       if(max_buf[0] == DATA_FIELD) {
         processData(max_buf, fileInfo);
       }
       else if(max_buf[0] == END_CONTROL){
         received = 1;
-        break;
       }
     }
   }

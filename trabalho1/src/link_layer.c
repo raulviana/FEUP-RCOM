@@ -322,10 +322,7 @@ int llwrite(int fd, unsigned char packet[], int packet_size){
     }
     else frame[framePosition++] = bcc2;
     frame[framePosition++] = FLAG;
-    printf("bbc2: %4X\n", frame[framePosition - 2]);
-    for(int i = 0; i < framePosition; i++){
-      printf("%4X  ", frame[i]);
-    }
+
     setAlarm(TIMEOUT);
     res = write(fd, frame, framePosition);
     if(readResponse(fd) == -1){ //Received REJ, have to resend frame
@@ -500,10 +497,7 @@ int confirmIntegrity(unsigned char* final_frame, int final_frame_length){
       expected_bcc2 ^= final_frame[i]; 
     }
     unsigned char bcc2 = final_frame[final_frame_length - 2];
-    printf("receivedbcc: %4X  expected bcc: %4X\n", bcc2, expected_bcc2);
-    for (int i = 0; i < final_frame_length; i++){
-      printf("%4X ", final_frame[i]);
-    }
+   
     if(bcc2 != expected_bcc2){
       printf("[ERROR]\n  Error in bcc2\n");
       return FALSE;
