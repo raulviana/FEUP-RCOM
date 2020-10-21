@@ -1,21 +1,24 @@
 
 
+#include "constants.h"
+#include "link_layer.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <termios.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <strings.h>
-
-#include "constants.h"
-#include "link_layer.h"
+#include <time.h>
 
 
 extern enum phase link_phase;
 FileInfo fileInfo;
+clock_t tic, toc;
 
 int check_bcc1(char control_message[], int size);
 int readControlPacket();
@@ -63,15 +66,18 @@ int main(int argc, char** argv)
     link_control.RJsent = 0;
     link_control.RRreceived =0;
     link_control.RRsent = 0;
+    link_control.framesReceived =0;
+    tic = clock();
     if(receiveFile(fileInfo) == -1){
       printf("[ERROR]\n  Error in llread\n");
       exit(2);
     }
     /*    +++++++++++++++++++++++++++++++++++   */
-
+    toc = clock();
     llclose(fd, RECEIVER);
     printf("[CONNECTION CLOSED]\n");
    
+    printStats();
 
     return 0;
 }
@@ -150,5 +156,14 @@ void processData(unsigned char* packet, FileInfo fileInfo){
 	int res = write(fileInfo.close_fd, &packet[4], dataSize);
 }
 
-
+void printStats(){
+  printf("\n     ***Statistics***\n");
+  printf("Total transfer time: %f seconds\n", (double)(toc - tic) * TIME_CORRECTION / CLOCKS_PER_SEC);
+  printf("Number of frames received: %d\n", link_control.framesReceived);
+  printf("Number of RR frames sent: %d\n", link_control.RRsent);
+  printf("Number of REJ frames sent: %d\n", link_control.RJsent);
+  printf("     **************\n");
+  
+  
+}
 

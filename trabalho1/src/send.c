@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <strings.h>
+#include <time.h>
 
 #include "constants.h"
 #include "link_layer.h"
@@ -17,10 +18,11 @@
 
 extern enum phase link_phase;
 int fd;
-
+clock_t tic, toc;
 
 int sendControlPacket(int fd, int control_type, FileInfo FileInfo);
 int sendFile(FileInfo fileInfo);
+void printStats();
 
 int main(int argc, char** argv)
 {
@@ -67,7 +69,9 @@ int main(int argc, char** argv)
     fileInfo.fileSize = meta_data.st_size;
     fileInfo.open_fd = file_fd;
     fileInfo.send_fileName = FILENAME;
-
+    
+    //start counting time
+    tic = clock();
     //construct and send opening control packet
     link_phase = SENDING_DATA;
     link_control.N_s = 1;
@@ -79,6 +83,8 @@ int main(int argc, char** argv)
     //send file
     link_phase = SENDING_DATA;
     link_control.N_s = 1;
+    link_control.framesReceived = 0;
+    link_control.framesSent = 0;
     link_control.RJreceived =0;
     link_control.RJsent = 0;
     link_control.RRreceived =0;
@@ -92,12 +98,15 @@ int main(int argc, char** argv)
       perror("[ERROR]\n Error sending ending control packet\n");
       exit(-1);
     }
-
+    //stop counting time
+    toc = clock();
     /*    +++++++++++++++++++++++++++++++++++   */
 
 
     llclose(fd, SENDER);
     printf("[CONNECTION CLOSED]\n");
+
+    printStats();
     
     return 0;
 }
@@ -170,5 +179,12 @@ int sendFile(FileInfo fileInfo){
   printf("[INFO]\n  Sent %d data bytes in %d chunks\n", total - DATA_PACKET_SIZE * chunks_sent,chunks_sent);
 }
 
-
+void printStats(){
+  printf("\n     ***Statistics***\n");
+  printf("Total transfer time: %f seconds\n", (double)(toc - tic) * TIME_CORRECTION / CLOCKS_PER_SEC);
+  printf("Number os frames sent: %d\n", link_control.framesSent);
+  printf("Number of RR frames received: %d\n", link_control.RRreceived);
+  printf("Number of REJ frames received: %d\n", link_control.RJreceived);
+  printf("     **************\n");
+}
 

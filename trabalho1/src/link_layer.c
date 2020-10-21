@@ -29,9 +29,7 @@ struct termios newtio, oldtio;
 enum state current;
 Link_control link_control;
 extern int fd;
-extern int conta;
 
-int contador = 0;
 
 int llopen(int type){
 
@@ -45,7 +43,7 @@ int llopen(int type){
     printf("[SENDING SET]\n");
     res = sendControl();
     //receive UA
-    setAlarm(3);                 // activa alarme de 3s
+    setAlarm(TIMEOUT);                 // activa alarme
     readMessage(fd, UA);
     cancelAlarm();
     }
@@ -82,7 +80,7 @@ int llclose(int fd, int type){
   //receiver
   else{
     //receive DISC
-    setAlarm(3);                 // activa alarme de 3s
+    setAlarm(TIMEOUT);                 // activa alarme de 3s
     readMessage(fd, DISC);
     cancelAlarm();
     printf("[INFO]\n  DISC received\n");
@@ -392,11 +390,15 @@ int llread(int fd, unsigned char* packet){
         packet[packet_length] = final_frame[i];
         packet_length++;
       }
+
+      //simulate propagation time
       nanosleep((const struct timespec[]){{0, T_PROP}}, NULL);
+      
       // //send proper response()
       if(control_field == C1){
         write(fd, RR0, sizeof(RR0));
         link_control.RRsent++;
+        link_control.framesReceived++;
         printf("[INFO]\n  RR0 sent\n");
         done == TRUE;
         break;
@@ -404,6 +406,7 @@ int llread(int fd, unsigned char* packet){
       else{
         write(fd, RR1, sizeof(RR1));
         link_control.RRsent++;
+        link_control.framesReceived++;
         printf("[INFO]\n  RR1 sent\n");
         done == TRUE;
         break;
@@ -425,7 +428,6 @@ int readFrame(int fd, unsigned char* frame){
     if(current == READ_FLAG && position != 0) position = 0;
     frame[position++] = byte_read;
   }
-  link_control.framesReceived++;
   return position;
 }
 
