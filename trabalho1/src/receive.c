@@ -20,7 +20,6 @@ extern enum phase link_phase;
 FileInfo fileInfo;
 clock_t tic, toc;
 
-int check_bcc1(char control_message[], int size);
 int readControlPacket();
 int receiveFile(FileInfo fileInfo);
 void processData(unsigned char* packet, FileInfo fileInfo);
