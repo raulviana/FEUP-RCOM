@@ -30,6 +30,7 @@ enum state current;
 Link_control link_control;
 extern int fd;
 extern int percentage_error;
+int bccFlag = FALSE;
 
 
 int llopen(int type){
@@ -351,7 +352,7 @@ int sendControl(){
 }
 
 
-int llread(int fd, unsigned char* packet){
+int llread(int fd, unsigned char* packet, int stage){
   unsigned char frame[MAX_FRAME_SIZE];
   unsigned char control_field = 0x00;
   int done = FALSE;
@@ -370,7 +371,7 @@ int llread(int fd, unsigned char* packet){
 
     control_field = frame[2];
     // //confirm data Integrity
-    if(! confirmIntegrity(final_frame, final_frame_length)){
+    if(! confirmIntegrity(final_frame, final_frame_length, stage)){
       printf("[ERROR]\n  Packet with error, asking re-emission\n");
       if(control_field == C0){
         write(fd, REJ1, sizeof(REJ1));
@@ -488,18 +489,19 @@ int readResponse(int fd){
 
 }
 
-int confirmIntegrity(unsigned char* final_frame, int final_frame_length){
+int confirmIntegrity(unsigned char* final_frame, int final_frame_length, int stage){
   unsigned char adress_field = final_frame[1];
   unsigned char control_field = final_frame[2];
   unsigned char BCC1 = final_frame[3]; 
   
  
   percentage_error = rand() % 101;
-  printf("percentage error: %d  proberror: %d", percentage_error, PROB_ERROR);
+  printf("percentage error: %d  proberror: %d\n", percentage_error, PROB_ERROR);
 
  
-  if(percentage_error < PROB_ERROR){
+  if(percentage_error < PROB_ERROR && stage == SENDING_DATA && bccFlag == TRUE){
     printf("[INFO]\n  Forced BCC1 error\n");
+    bccFlag= FALSE;
     return FALSE;
   }
   
@@ -513,9 +515,10 @@ int confirmIntegrity(unsigned char* final_frame, int final_frame_length){
     unsigned char bcc2 = final_frame[final_frame_length - 2];
   
     percentage_error = rand() % 101;
-    printf("percentage error: %d  proberror: %d", percentage_error, PROB_ERROR);
-    if(percentage_error < PROB_ERROR){
+    printf("percentage error: %d  proberror: %d\n", percentage_error, PROB_ERROR);
+    if(percentage_error < PROB_ERROR && stage == SENDING_DATA  && bccFlag== TRUE){
     printf("[INFO]\n  Forced BCC2 error\n");
+    bccFlag = FALSE;
     return FALSE;
     }
 
@@ -528,6 +531,7 @@ int confirmIntegrity(unsigned char* final_frame, int final_frame_length){
     printf("[ERROR]\n  Error in control field received\n");
     return FALSE;
   }
+  bccFlag = TRUE;
   return TRUE;
 }
 

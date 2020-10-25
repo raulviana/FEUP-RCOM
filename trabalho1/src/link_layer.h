@@ -44,7 +44,7 @@ int sendControl();
 unsigned char COM_currentMachine(enum state* current, unsigned char buf);
 void data_currentMachine(enum state* current, unsigned char buf);
 
-int llread(int fd, unsigned char* packet);
+int llread(int fd, unsigned char* packet, int stage);
 
 int readFrame(int fd, unsigned char* frame);
 
@@ -52,4 +52,4 @@ int  destuffFrame(unsigned char* frame, int frame_length, unsigned char* final_f
 
 int readResponse(int fd);
 
-int confirmIntegrity(unsigned char* final_frame, int final_frame_length);
+int confirmIntegrity(unsigned char* final_frame, int final_frame_length, int stage);

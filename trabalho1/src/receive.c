@@ -43,6 +43,7 @@ int main(int argc, char** argv)
     // }
 
     printf("      -->RECEIVER<--\n");
+    
     link_phase = OPENING_CONNECTION;
     fd = llopen(RECEIVER);
     if(fd == -1){
@@ -70,16 +71,18 @@ int main(int argc, char** argv)
     link_control.RRreceived =0;
     link_control.RRsent = 0;
     link_control.framesReceived =0;
+    
     tic = clock();
     if(receiveFile(fileInfo) == -1){
       printf("[ERROR]\n  Error in llread\n");
       exit(2);
     }
-    /*    +++++++++++++++++++++++++++++++++++   */
     toc = clock();
+    /*    +++++++++++++++++++++++++++++++++++   */
+   
     llclose(fd, RECEIVER);
     printf("[CONNECTION CLOSED]\n");
-   
+    
     printStats();
 
     return 0;
@@ -88,7 +91,7 @@ int main(int argc, char** argv)
 
 int readControlPacket(){
   unsigned char packet[MAX_FRAME_SIZE];
-  int res = llread(fd, packet);
+  int res = llread(fd, packet, OPENING_CONNECTION);
   if(res == -1){
     return -1;
   } 
@@ -134,7 +137,7 @@ int receiveFile(FileInfo fileInfo){
   unsigned int received = 0;
   int aux = 0;
   while(! received){
-    if((aux = llread(fd, max_buf)) != 0){
+    if((aux = llread(fd, max_buf, SENDING_DATA)) != 0){
 
       printf("[INFO]\n  Received packet #%d\n", link_control.framesReceived);
       
@@ -165,7 +168,7 @@ void printStats(){
   printf("Number of frames received: %d\n", link_control.framesReceived);
   printf("Number of RR frames sent: %d\n", link_control.RRsent);
   printf("Number of REJ frames sent: %d\n", link_control.RJsent);
-  printf("     **************\n");
+  printf("      **************\n");
   
   
 }

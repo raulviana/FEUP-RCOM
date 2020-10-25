@@ -41,6 +41,7 @@ int main(int argc, char** argv)
     (void) signal(SIGALRM, atende);  // instala  rotina que atende interrupcao
 
     printf("      -->SEnder<--\n");
+    
 
     link_phase = OPENING_CONNECTION;
     fd = llopen(SENDER);
@@ -73,8 +74,7 @@ int main(int argc, char** argv)
     fileInfo.open_fd = file_fd;
     fileInfo.send_fileName = FILENAME;
     
-    //start counting time
-    tic = clock();
+ 
     //construct and send opening control packet
     link_phase = SENDING_DATA;
     link_control.N_s = 1;
@@ -92,23 +92,26 @@ int main(int argc, char** argv)
     link_control.RJsent = 0;
     link_control.RRreceived =0;
     link_control.RRsent = 0;
+    //start counting time
+    tic = clock();
     if(sendFile(fileInfo) == -1){
       printf("[ERROR]\n  Error in llwrite\n");
       exit(2);
     }
+    //stop counting time
+    toc = clock();
     //construct and send closing control packet
     if(sendControlPacket(fd, END_CONTROL, fileInfo) == -1){
       perror("[ERROR]\n Error sending ending control packet\n");
       exit(-1);
     }
-    //stop counting time
-    toc = clock();
+   
     /*    +++++++++++++++++++++++++++++++++++   */
 
 
     llclose(fd, SENDER);
     printf("[CONNECTION CLOSED]\n");
-
+   
     printStats();
     
     return 0;

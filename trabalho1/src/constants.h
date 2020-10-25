@@ -5,11 +5,11 @@
 #define SENDER_PORT "/dev/ttyS10"
 #define RECEIVER_PORT "/dev/ttyS11"
 #define BAUDRATE B38400
-#define MAX_CHUNK_SIZE 21 //tem de caber o nome do ficheiro e o seu tamanho no pacote de controlo
+#define MAX_CHUNK_SIZE 512 //tem de caber o nome do ficheiro e o seu tamanho no pacote de controlo
                           //para  pinguim.gif min = 21;
 #define T_PROP 5000000L // 500000 nanoseconds -> 500 microsends
 #define TIME_CORRECTION 100 //to seconds
-#define PROB_ERROR 5   // em percentagem
+#define PROB_ERROR 0   // em percentagem
 /********************************/
 
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
