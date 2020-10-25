@@ -9,6 +9,7 @@
                           //para  pinguim.gif min = 21;
 #define T_PROP 5000000L // 500000 nanoseconds -> 500 microsends
 #define TIME_CORRECTION 100 //to seconds
+#define PROB_ERROR 5   // em percentagem
 /********************************/
 
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
@@ -47,7 +48,7 @@
 
 
 #define TIMEOUT 3
-#define MAX_TRIES 3
+#define MAX_TRIES 5
 
 #define RECEIVER 2
 #define SENDER 1

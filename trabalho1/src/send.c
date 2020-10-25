@@ -19,6 +19,7 @@
 extern enum phase link_phase;
 int fd;
 clock_t tic, toc;
+int percentage_error;
 
 int sendControlPacket(int fd, int control_type, FileInfo FileInfo);
 int sendFile(FileInfo fileInfo);
@@ -26,6 +27,8 @@ void printStats();
 
 int main(int argc, char** argv)
 {
+    srand(time(NULL));
+    percentage_error = rand() % 101;
     int c, res;
     struct termios oldtio,newtio;
     // if ( (argc < 2) ||

@@ -29,6 +29,7 @@ struct termios newtio, oldtio;
 enum state current;
 Link_control link_control;
 extern int fd;
+extern int percentage_error;
 
 
 int llopen(int type){
@@ -490,7 +491,18 @@ int readResponse(int fd){
 int confirmIntegrity(unsigned char* final_frame, int final_frame_length){
   unsigned char adress_field = final_frame[1];
   unsigned char control_field = final_frame[2];
-  unsigned char BCC1 = final_frame[3];
+  unsigned char BCC1 = final_frame[3]; 
+  
+ 
+  percentage_error = rand() % 101;
+  printf("percentage error: %d  proberror: %d", percentage_error, PROB_ERROR);
+
+ 
+  if(percentage_error < PROB_ERROR){
+    printf("[INFO]\n  Forced BCC1 error\n");
+    return FALSE;
+  }
+  
 
   if((BCC1 == BCC(adress_field, control_field)) && (control_field == C0 || control_field == C1)){
   //calculate expected bcc2 ( data packet is between 4 and size - 2 of frame)
@@ -499,7 +511,14 @@ int confirmIntegrity(unsigned char* final_frame, int final_frame_length){
       expected_bcc2 ^= final_frame[i]; 
     }
     unsigned char bcc2 = final_frame[final_frame_length - 2];
-   
+  
+    percentage_error = rand() % 101;
+    printf("percentage error: %d  proberror: %d", percentage_error, PROB_ERROR);
+    if(percentage_error < PROB_ERROR){
+    printf("[INFO]\n  Forced BCC2 error\n");
+    return FALSE;
+    }
+
     if(bcc2 != expected_bcc2){
       printf("[ERROR]\n  Error in bcc2\n");
       return FALSE;
