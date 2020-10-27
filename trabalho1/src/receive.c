@@ -19,7 +19,7 @@
 extern enum phase link_phase;
 FileInfo fileInfo;
 clock_t tic, toc;
-double percentage_error;
+int current_percentage_error;
 
 int readControlPacket();
 int receiveFile(FileInfo fileInfo);
@@ -29,7 +29,7 @@ void printStats();
 int main(int argc, char** argv)
 {
     srand(time(NULL));
-    percentage_error = rand() % 101;
+    current_percentage_error = rand() % 101;
     int fd,c, res;
     struct termios oldtio,newtio;
     bzero(&fileInfo, sizeof(fileInfo));

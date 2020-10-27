@@ -29,7 +29,7 @@ struct termios newtio, oldtio;
 enum state current;
 Link_control link_control;
 extern int fd;
-extern int percentage_error;
+extern int current_percentage_error;
 int bccFlag = FALSE;
 
 
@@ -495,11 +495,8 @@ int confirmIntegrity(unsigned char* final_frame, int final_frame_length, int sta
   unsigned char BCC1 = final_frame[3]; 
   
  
-  percentage_error = rand() % 101;
-  printf("percentage error: %d  proberror: %d\n", percentage_error, PROB_ERROR);
-
- 
-  if(percentage_error < PROB_ERROR && stage == SENDING_DATA && bccFlag == TRUE){
+  current_percentage_error = rand() % 101;
+  if(current_percentage_error < PROB_ERROR && stage == SENDING_DATA && bccFlag == TRUE){
     printf("[INFO]\n  Forced BCC1 error\n");
     bccFlag= FALSE;
     return FALSE;
@@ -514,9 +511,8 @@ int confirmIntegrity(unsigned char* final_frame, int final_frame_length, int sta
     }
     unsigned char bcc2 = final_frame[final_frame_length - 2];
   
-    percentage_error = rand() % 101;
-    printf("percentage error: %d  proberror: %d\n", percentage_error, PROB_ERROR);
-    if(percentage_error < PROB_ERROR && stage == SENDING_DATA  && bccFlag== TRUE){
+    current_percentage_error = rand() % 101;
+    if(current_percentage_error < PROB_ERROR && stage == SENDING_DATA  && bccFlag== TRUE){
     printf("[INFO]\n  Forced BCC2 error\n");
     bccFlag = FALSE;
     return FALSE;
