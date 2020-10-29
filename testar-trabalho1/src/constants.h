@@ -4,12 +4,12 @@
 #define FILENAME "pinguim.gif"   // "pinguim.gif"
 #define SENDER_PORT "/dev/ttyS0"
 #define RECEIVER_PORT "/dev/ttyS0"
-#define BAUDRATE B1400
+#define BAUDRATE B1200
 #define MAX_CHUNK_SIZE 112 //tem de caber o nome do ficheiro e o seu tamanho no pacote de controlo
                           //para  pinguim.gif min = 21;
-#define T_PROP 500000000L // 500000 nanoseconds -> 500 microsends
+#define T_PROP 5000000L // 500000 nanoseconds -> 500 microsends
 #define TIME_CORRECTION 100 //to seconds
-#define PROB_ERROR 6   // em percentagem
+#define PROB_ERROR 2   // em percentagem
 /********************************/
 
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
@@ -17,7 +17,7 @@
 #define MAX_FRAME_SIZE 2 * MAX_CHUNK_SIZE
 
 #define CONTROL_SIZE 5
-#define DATA_PACKET_SIZE 80
+#define DATA_PACKET_SIZE 40
 
 
 #define FALSE 0
