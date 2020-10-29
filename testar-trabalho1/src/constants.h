@@ -9,7 +9,7 @@
                           //para  pinguim.gif min = 21;
 #define T_PROP 500000000L // 500000 nanoseconds -> 500 microsends
 #define TIME_CORRECTION 100 //to seconds
-#define PROB_ERROR 6   // em percentagem
+#define PROB_ERROR 8   // em percentagem
 /********************************/
 
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
@@ -17,7 +17,7 @@
 #define MAX_FRAME_SIZE 2 * MAX_CHUNK_SIZE
 
 #define CONTROL_SIZE 5
-#define DATA_PACKET_SIZE 80
+#define DATA_PACKET_SIZE 100
 
 
 #define FALSE 0
