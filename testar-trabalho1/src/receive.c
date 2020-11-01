@@ -18,13 +18,13 @@
 
 extern enum phase link_phase;
 FileInfo fileInfo;
-clock_t tic, toc;
+struct timespec t0, t1;
 int current_percentage_error;
 
 int readControlPacket();
 int receiveFile(FileInfo fileInfo);
 void processData(unsigned char* packet, FileInfo fileInfo);
-void printStats();
+void printStats(double time_taken);
 
 int main(int argc, char** argv)
 {
@@ -33,6 +33,8 @@ int main(int argc, char** argv)
     int fd,c, res;
     struct termios oldtio,newtio;
     bzero(&fileInfo, sizeof(fileInfo));
+
+    
     
     unsigned char packet[MAX_FRAME_SIZE + DATA_PACKET_SIZE];
     // if ( (argc < 2) ||
@@ -55,10 +57,11 @@ int main(int argc, char** argv)
 
    
     /*    +++++++DATA Receiving+++++++++++++++   */
- 
+   
     //receive start control packet
     link_phase = OPENING_CONNECTION;
     link_control.N_s = 0;
+    
     if(readControlPacket() == -1){
       perror("[ERROR]\n Error reading start control packet\n");
       exit(1);
@@ -72,18 +75,21 @@ int main(int argc, char** argv)
     link_control.RRsent = 0;
     link_control.framesReceived =0;
     
-    tic = clock();
+    clock_gettime(0, &t0);
+
     if(receiveFile(fileInfo) == -1){
       printf("[ERROR]\n  Error in llread\n");
       exit(2);
     }
-    toc = clock();
+    
+    clock_gettime(0, &t1);
+    double time_taken = ((double) t1.tv_sec - t0.tv_sec) + ((double)(t1.tv_nsec - t0.tv_nsec) /1000000000L);
     /*    +++++++++++++++++++++++++++++++++++   */
    
     llclose(fd, RECEIVER);
     printf("[CONNECTION CLOSED]\n");
     
-    printStats();
+    printStats(time_taken);
 
     return 0;
 }
@@ -162,9 +168,9 @@ void processData(unsigned char* packet, FileInfo fileInfo){
 	int res = write(fileInfo.close_fd, &packet[4], dataSize);
 }
 
-void printStats(){
+void printStats(double time_taken){
   printf("\n     ***Statistics***\n");
-  printf("Total transfer time: %f seconds\n", (double)(toc - tic) * TIME_CORRECTION / CLOCKS_PER_SEC);
+  printf("Total transfer time: %f seconds\n",time_taken);
   printf("Number of frames received: %d\n", link_control.framesReceived);
   printf("Number of RR frames sent: %d\n", link_control.RRsent);
   printf("Number of REJ frames sent: %d\n", link_control.RJsent);

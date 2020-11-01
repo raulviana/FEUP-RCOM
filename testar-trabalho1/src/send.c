@@ -94,12 +94,14 @@ int main(int argc, char** argv)
     link_control.RRsent = 0;
     //start counting time
     tic = clock();
+
     if(sendFile(fileInfo) == -1){
       printf("[ERROR]\n  Error in llwrite\n");
       exit(2);
     }
     //stop counting time
     toc = clock();
+
     //construct and send closing control packet
     if(sendControlPacket(fd, END_CONTROL, fileInfo) == -1){
       perror("[ERROR]\n Error sending ending control packet\n");
@@ -187,7 +189,6 @@ int sendFile(FileInfo fileInfo){
 
 void printStats(){
   printf("\n     ***Statistics***\n");
-  printf("Total transfer time: %f seconds\n", (double)(toc - tic) * TIME_CORRECTION / CLOCKS_PER_SEC);
   printf("Number os frames sent: %d\n", link_control.framesSent);
   printf("Number of RR frames received: %d\n", link_control.RRreceived);
   printf("Number of REJ frames received: %d\n", link_control.RJreceived);
