@@ -16,7 +16,7 @@
 #include "link_layer.h"
 
 int conta = 1;
-
+extern receiver_id; 
 enum phase link_phase;
 
 void setAlarm(int seconds){
@@ -40,6 +40,7 @@ void atende()       // atende alarme
 			case SENDING_DATA:
 				printf("[TIMEOUT]\n  #%d: No response packet\n", conta);
 				conta++;
+				if (receiver_id = TRUE) printf("BORa\n");
 				break;
 			case CLOSING_CONNECTION:
 				printf("[TIMEOUT]\n  #d: No DISC received\n");
