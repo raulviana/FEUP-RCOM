@@ -1,19 +1,13 @@
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <signal.h>
-#include <strings.h>
+
 
 
 #include "alarm.h"
-#include "constants.h"
-#include "link_layer.h"
+
+
+
+extern Link_control link_control;
+extern int receive_id;
 
 int conta = 1;
 
@@ -40,6 +34,12 @@ void atende()       // atende alarme
 			case SENDING_DATA:
 				printf("[TIMEOUT]\n  #%d: No response packet\n", conta);
 				conta++;
+				if(receive_id == TRUE && link_control.N_s ==1){
+					write(fd, REJ1, sizeof(REJ1));
+				}
+				else if(receive_id == TRUE && link_control.N_s ==0){
+					write(fd, REJ0, sizeof(REJ0));
+				}
 				break;
 			case CLOSING_CONNECTION:
 				printf("[TIMEOUT]\n  #d: No DISC received\n");

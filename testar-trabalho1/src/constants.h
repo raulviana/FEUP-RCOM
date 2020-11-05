@@ -71,5 +71,7 @@ enum phase{
 
 int fd;
 
+int receive_id;
+
 
 

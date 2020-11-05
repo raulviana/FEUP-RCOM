@@ -5,6 +5,9 @@
 #define SENDER 1
 #define RECEIVER 2
 
+extern unsigned char REJ0[5];
+extern unsigned char REJ1[5];
+
 enum state {
  	START,
  	READ_FLAG,

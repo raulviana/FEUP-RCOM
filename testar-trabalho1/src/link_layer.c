@@ -17,6 +17,13 @@
 #include <strings.h>
 #include <time.h>
 
+struct termios newtio, oldtio;
+enum state current;
+Link_control link_control;
+extern int fd;
+extern int current_percentage_error;
+int bccFlag = FALSE;
+
 unsigned char SET[5] = { FLAG, CONTROL, CONTROL_SET, BCC(CONTROL, CONTROL_SET), FLAG};
 unsigned char UA[5] = {FLAG, CONTROL, CONTROL_UA, BCC(CONTROL, CONTROL_UA), FLAG};
 unsigned char DISC[5] = {FLAG, CONTROL, CONTROL_DISC, BCC(CONTROL, CONTROL_DISC), FLAG};
@@ -24,13 +31,6 @@ unsigned char RR1[5] = {FLAG, CONTROL, C_R1, BCC(CONTROL, C_R1), FLAG};
 unsigned char RR0[5] = {FLAG, CONTROL, C_R0, BCC(CONTROL, C_R0), FLAG};
 unsigned char REJ0[5] = {FLAG, CONTROL, C_REJ1, BCC(CONTROL, C_REJ1), FLAG};
 unsigned char REJ1[5] = {FLAG, CONTROL, C_REJ0, BCC(CONTROL, C_REJ0), FLAG};
-
-struct termios newtio, oldtio;
-enum state current;
-Link_control link_control;
-extern int fd;
-extern int current_percentage_error;
-int bccFlag = FALSE;
 
 
 int llopen(int type){

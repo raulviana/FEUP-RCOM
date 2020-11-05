@@ -21,6 +21,8 @@ FileInfo fileInfo;
 struct timespec t0, t1;
 int current_percentage_error;
 
+extern int received_id = FALSE;
+
 int readControlPacket();
 int receiveFile(FileInfo fileInfo);
 void processData(unsigned char* packet, FileInfo fileInfo);
@@ -45,6 +47,8 @@ int main(int argc, char** argv)
     // }
 
     printf("      -->RECEIVER<--\n");
+
+	receive_id = TRUE;
     
     link_phase = OPENING_CONNECTION;
     fd = llopen(RECEIVER);
