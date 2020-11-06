@@ -21,7 +21,7 @@ FileInfo fileInfo;
 struct timespec t0, t1;
 int current_percentage_error;
 
-extern int received_id = FALSE;
+extern int receive_id = FALSE;
 
 int readControlPacket();
 int receiveFile(FileInfo fileInfo);
