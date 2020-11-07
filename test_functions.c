@@ -10,17 +10,27 @@
 #include <strings.h>
 #include <time.h>
 
-void fun(){
-  sleep(4);
+int flag=1, conta=1;
+
+void atende()                   // atende alarme
+{
+	printf("alarme # %d\n", conta);
+	flag=1;
+	conta++;
 }
 
-int main(){
 
-  clock_t t;
-  t = clock();
-  fun();
-  t = clock() - t;
-  double taken = ((double) t)  / CLOCKS_PER_SEC;
-  printf("time teken: %f\n", taken);
-    return 0;
+main()
+{
+
+(void) signal(SIGALRM, atende);  // instala  rotina que atende interrupcao
+
+while(conta < 4){
+   if(flag){
+      alarm(3);                 // activa alarme de 3s
+      flag=0;
+   }
+}
+printf("Vou terminar.\n");
+
 }
