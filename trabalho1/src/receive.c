@@ -22,6 +22,9 @@ struct timespec t0, t1;
 int current_percentage_error;
 int receiver_id = FALSE;
 
+int continueFlag = FALSE;
+int numTries = 1;
+
 int readControlPacket();
 int receiveFile(FileInfo fileInfo);
 void processData(unsigned char* packet, FileInfo fileInfo);

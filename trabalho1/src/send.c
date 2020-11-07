@@ -21,6 +21,10 @@ int fd;
 clock_t tic, toc;
 int current_percentage_error;
 
+
+int continueFlag = FALSE;
+int numTries = 1;
+
 int sendControlPacket(int fd, int control_type, FileInfo FileInfo);
 int sendFile(FileInfo fileInfo);
 void printStats();

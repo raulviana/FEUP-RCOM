@@ -1,5 +1,6 @@
 #pragma once 
 
+
 /******** Alterável *************/
 #define FILENAME "pinguim.gif"   // "pinguim.gif"
 #define SENDER_PORT "/dev/ttyS10"

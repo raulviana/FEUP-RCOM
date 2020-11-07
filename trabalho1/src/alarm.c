@@ -1,50 +1,55 @@
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <signal.h>
-#include <strings.h>
-
+   #include <stdlib.h>
 
 #include "alarm.h"
 #include "constants.h"
 #include "link_layer.h"
 
-int conta = 1;
-extern receiver_id; 
+
 enum phase link_phase;
 
 void setAlarm(int seconds){
+	struct sigaction sa;
+	sa.sa_handler = &atende;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+
+	sigaction(SIGALRM, &sa, NULL);
     alarm(seconds);
 }
 
 void cancelAlarm(){
+	struct sigaction action;
+	action.sa_handler = NULL;
+
+	sigaction(SIGALRM, &action, NULL);
     alarm(0);
-    conta = 1;
+	continueFlag = FALSE;
+	numTries = 1;
 }
 
-void atende()       // atende alarme
+void atende(int signal)       // atende alarme
 {
-	if(conta <= MAX_TRIES){
+	if(signal != SIGALRM) return;
+
+	if(numTries <= MAX_TRIES){
 		switch(link_phase){
 			case OPENING_CONNECTION:
-			    printf("[TIMEOUT]\n  #%d: Return message not received\n", conta);
+			    printf("[TIMEOUT]\n  #%d: Return message not received\n", numTries);
 				sendControl();    
-				conta++;
 				break;
 			case SENDING_DATA:
-				printf("[TIMEOUT]\n  #%d: No response packet\n", conta);
-				conta++;
-				if (receiver_id = TRUE) printf("BORa\n");
+				printf("[TIMEOUT]\n  #%d: No response packet\n", numTries);
+				printf("tries: %d\n", numTries);
+				numTries++;
+				continueFlag = TRUE;
+			
+				printf("flag: %d\n", continueFlag);
+			
 				break;
 			case CLOSING_CONNECTION:
 				printf("[TIMEOUT]\n  #d: No DISC received\n");
-				conta++;
+		
 			default:
 				break;
 		}

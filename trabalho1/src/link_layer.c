@@ -277,17 +277,14 @@ int llwrite(int fd, unsigned char packet[], int packet_size){
   if(link_control.N_s == 0) link_control.N_s = 1;
   else link_control.N_s = 0;
 
-  unsigned int continueFlag = TRUE;
+  int continueFlag = TRUE;
   int res;
   unsigned int framePosition;;
   unsigned int tries = 0;
   unsigned char frame[2 * packet_size + 6]; // 6 = F+A+C+BCC1+BCC2+F || 2*packet para assegurar que existe espaço suficiente para byte stuffing 
    
-  do{
-    if(tries >= MAX_TRIES){
-      printf("[ERROR]\n  Max tries reached, aborting\n");
-      return -1;
-    }
+  
+  
     framePosition = 4;
     //compose frame
     //frame: [F, A, C, BCC1, [packet], BCC2, F]
@@ -324,24 +321,37 @@ int llwrite(int fd, unsigned char packet[], int packet_size){
     }
     else frame[framePosition++] = bcc2;
     frame[framePosition++] = FLAG;
+    
 
-    setAlarm(TIMEOUT);
+   do{ 
+     for ( int i = 0 ; i < framePosition; i++){
+       printf(" %4X  ", frame[i]);
+     }
+     printf("sending frame %d\n", link_control.framesSent);
     res = write(fd, frame, framePosition);
-    if(readResponse(fd) == -1){ //Received REJ, have to resend frame
-      cancelAlarm();
-      bzero(&frame, framePosition);
-       printf("[ALERT]\n Re-sending frame number %d with size %d\n", link_control.framesSent, framePosition);
-      tries++;
-      continue;
-    }
-    else {
-      cancelAlarm();
-      continueFlag = FALSE;
-    }
-  }while( continueFlag);
-  link_control.framesSent++;
-  printf("[INFO]\n Sent frame number %d with size %d\n", link_control.framesSent, framePosition);
+    continueFlag = FALSE;setAlarm(TIMEOUT);
+    printf("\nres: %d\n", res);
+     
+    
+    int stat = readResponse(fd);
+
+     if(stat == 0){
+    link_control.RRreceived++;
+    printf("[INFO]\n  Received RR #%d\n", link_control.RRreceived);
+     }
+  
+  else{
+    link_control.RJreceived++;
+    printf("[INFO]\n  Received REJ #%d\n", link_control.RJreceived);
    
+  }
+  
+   printf("continueflag: %d    numtries: %d\n", continueFlag, numTries);
+   }while(continueFlag && numTries <= MAX_TRIES);
+ cancelAlarm();
+  
+  printf("[INFO]\n Sent frame number %d with size %d\n", link_control.framesSent, framePosition);
+   link_control.framesSent++;
   return res;
 }
 
@@ -421,15 +431,16 @@ int llread(int fd, unsigned char* packet, int stage){
 
 int readFrame(int fd, unsigned char* frame){
   enum state current = START;
-  unsigned char byte_read = 0x00;
+  unsigned char byte_read;
   int position = 0;
-  unsigned char state_return;
+  
   while (current != STOP){
     read(fd, &byte_read, 1);
+    printf("byte: %4X\n", byte_read);
     data_currentMachine(&current, byte_read);
-    if(current == READ_FLAG && position != 0) position = 0;
-    frame[position++] = byte_read;
+  frame[position++] = byte_read;
   }
+  
   return position;
 }
 
@@ -463,30 +474,22 @@ int  destuffFrame(unsigned char* frame, int frame_length, unsigned char* final_f
 int readResponse(int fd){
   unsigned char byte_read, control_field;
   current = START;
-
-  while(current != STOP){
-    read(fd, &byte_read, 1);
+  while(current != STOP && !continueFlag){
+    int res = read(fd, &byte_read, 1);
     COM_currentMachine(&current, byte_read);
     if(current == READ_BCC){
       control_field = byte_read;
     }
   }
   if(control_field == C_R0 && link_control.N_s == 1){
-    link_control.RRreceived++;
-    printf("[INFO]\n  Received RR #%d\n", link_control.RRreceived);
     return 0;
   }
   else if(control_field == C_R1 && link_control.N_s == 0){
-    link_control.RRreceived++;
-    printf("[INFO]\n  Received RR #%d\n", link_control.RRreceived);
     return 0;
   }
   else{
-    link_control.RJreceived++;
-    printf("[INFO]\n  Received REJ #%d\n", link_control.RJreceived);
     return -1;
   }
-
 }
 
 int confirmIntegrity(unsigned char* final_frame, int final_frame_length, int stage){

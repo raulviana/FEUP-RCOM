@@ -2,6 +2,9 @@
 
 #include "constants.h"
 
+
+extern int continueFlag;
+
 #define SENDER 1
 #define RECEIVER 2
 
