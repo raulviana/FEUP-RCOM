@@ -327,12 +327,10 @@ int llwrite(int fd, unsigned char packet[], int packet_size){
      for ( int i = 0 ; i < framePosition; i++){
        printf(" %4X  ", frame[i]);
      }
-     printf("sending frame %d\n", link_control.framesSent);
+    
     res = write(fd, frame, framePosition);
     continueFlag = FALSE;setAlarm(TIMEOUT);
-    printf("\nres: %d\n", res);
-     
-    
+   
     int stat = readResponse(fd);
 
      if(stat == 0){
@@ -346,9 +344,12 @@ int llwrite(int fd, unsigned char packet[], int packet_size){
    
   }
   
-   printf("continueflag: %d    numtries: %d\n", continueFlag, numTries);
-   }while(continueFlag && numTries <= MAX_TRIES);
- cancelAlarm();
+   printf("continueflag: %d    numtries: %d\n", continueFlag, numTries); 
+   
+   }while(!continueFlag && numTries <= MAX_TRIES);
+   printf("will canvel alarm\n");
+   if (numTries >= MAX_TRIES) return -1;
+cancelAlarm();
   
   printf("[INFO]\n Sent frame number %d with size %d\n", link_control.framesSent, framePosition);
    link_control.framesSent++;

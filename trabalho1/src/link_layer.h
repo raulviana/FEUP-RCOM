@@ -4,6 +4,7 @@
 
 
 extern int continueFlag;
+extern int numTries;
 
 #define SENDER 1
 #define RECEIVER 2
