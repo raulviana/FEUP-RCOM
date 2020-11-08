@@ -329,27 +329,25 @@ int llwrite(int fd, unsigned char packet[], int packet_size){
      }
     
     res = write(fd, frame, framePosition);
-    continueFlag = FALSE;setAlarm(TIMEOUT);
    
-    int stat = readResponse(fd);
+    setAlarm(TIMEOUT);
+    continueFlag = 0;
+   
+    if(readResponse(fd) == -1){
+      cancelAlarm();
+      continueFlag = 1;
+      link_control.RJreceived++;
+      printf("[INFO]\n  Received REJ #%d\n", link_control.RJreceived);
+      continue;
+    }
 
-     if(stat == 0){
-    link_control.RRreceived++;
-    printf("[INFO]\n  Received RR #%d\n", link_control.RRreceived);
-     }
-  
-  else{
-    link_control.RJreceived++;
-    printf("[INFO]\n  Received REJ #%d\n", link_control.RJreceived);
-   
-  }
-  
    printf("continueflag: %d    numtries: %d\n", continueFlag, numTries); 
    
-   }while(!continueFlag && numTries <= MAX_TRIES);
+   }while(continueFlag && numTries <= MAX_TRIES);
    printf("will canvel alarm\n");
    if (numTries >= MAX_TRIES) return -1;
-cancelAlarm();
+   else numTries = 1; 
+  cancelAlarm();
   
   printf("[INFO]\n Sent frame number %d with size %d\n", link_control.framesSent, framePosition);
    link_control.framesSent++;

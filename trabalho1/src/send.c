@@ -23,7 +23,7 @@ int current_percentage_error;
 
 
 int continueFlag = FALSE;
-int numTries = 1;
+int numTries = 0;
 
 int sendControlPacket(int fd, int control_type, FileInfo FileInfo);
 int sendFile(FileInfo fileInfo);
@@ -100,7 +100,7 @@ int main(int argc, char** argv)
     tic = clock();
 
     if(sendFile(fileInfo) == -1){
-      printf("[ERROR]\n  Error in llwrite\n");
+      printf("[ERROR]\n  Error in llwrite - ABORTING\n");
       exit(2);
     }
     //stop counting time

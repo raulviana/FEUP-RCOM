@@ -7,7 +7,7 @@
 extern int continueFlag;
 extern int numTries;
 
-void setAlarm(int seconds);
+void setAlarm();
 
 void cancelAlarm();
 

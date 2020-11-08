@@ -20,10 +20,9 @@ extern enum phase link_phase;
 FileInfo fileInfo;
 struct timespec t0, t1;
 int current_percentage_error;
-int receiver_id = FALSE;
 
 int continueFlag = FALSE;
-int numTries = 1;
+int numTries = 0;
 
 int readControlPacket();
 int receiveFile(FileInfo fileInfo);
@@ -49,7 +48,7 @@ int main(int argc, char** argv)
     // }
 
     printf("      -->RECEIVER<--\n");
-    receiver_id = TRUE;
+
     link_phase = OPENING_CONNECTION;
     fd = llopen(RECEIVER);
     if(fd == -1){
