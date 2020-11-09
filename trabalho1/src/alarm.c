@@ -12,7 +12,7 @@ void atende(int signal) {
   if(signal != SIGALRM)
     return;
 
-  printf("Alarm: %d*********************************************\n", numTries + 1);
+  printf("[TIMEOUT]\n  Alarm #: %d\n", numTries + 1);
 	continueFlag = 1;
 	numTries++;
 }

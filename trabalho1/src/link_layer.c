@@ -43,12 +43,20 @@ int llopen(int type){
     //send SET
     printf("[STARTING CONNECTION]\n");
     printf("[SENDING SET]\n");
-    res = sendControl();
-    //receive UA
-    setAlarm(TIMEOUT);                 // activa alarme
-    readMessage(fd, UA);
+      
+    do{
+
+      res = sendControl();
+      //receive UA
+        setAlarm(TIMEOUT);
+      continueFlag = 0;                // activa alarme
+      readMessage(fd, UA);
+      cancelAlarm();
+    }while(continueFlag && numTries <= MAX_TRIES);
+    if (numTries >= MAX_TRIES) return -1;
+    else numTries = 1; 
     cancelAlarm();
-    }
+  }
     
     //receiver
     else{
@@ -72,10 +80,17 @@ int llclose(int fd, int type){
   if(type == SENDER){
     //send DISC
     printf("[CLOSING CONNECTION]\n[INFO]\n  Sending DISC\n");
-    write(fd, DISC, sizeof(DISC));
-    //receive UA
-    setAlarm(TIMEOUT);                 // activa alarme de 3s
-    readMessage(fd, UA);
+   
+    do{
+      write(fd, DISC, sizeof(DISC));
+      //receive UA
+      setAlarm(TIMEOUT);
+      continueFlag = 0;                  // activa alarme de 3s
+      readMessage(fd, UA);
+      cancelAlarm();
+    }while(continueFlag && numTries <= MAX_TRIES);
+    if (numTries >= MAX_TRIES) return -1;
+    else numTries = 1; 
     cancelAlarm();
     printf("[INFO]\n  UA received\n");
   }
@@ -321,18 +336,14 @@ int llwrite(int fd, unsigned char packet[], int packet_size){
     }
     else frame[framePosition++] = bcc2;
     frame[framePosition++] = FLAG;
-    
+  
+  do{
 
-   do{ 
-     for ( int i = 0 ; i < framePosition; i++){
-       printf(" %4X  ", frame[i]);
-     }
-    
     res = write(fd, frame, framePosition);
-   
+    
     setAlarm(TIMEOUT);
     continueFlag = 0;
-   
+    
     if(readResponse(fd) == -1){
       cancelAlarm();
       continueFlag = 1;
@@ -340,18 +351,14 @@ int llwrite(int fd, unsigned char packet[], int packet_size){
       printf("[INFO]\n  Received REJ #%d\n", link_control.RJreceived);
       continue;
     }
+  }while(continueFlag && numTries <= MAX_TRIES);
+  if (numTries >= MAX_TRIES) return -1;
+  else numTries = 1; 
+  cancelAlarm();
 
-   printf("continueflag: %d    numtries: %d\n", continueFlag, numTries); 
-   
-   }while(continueFlag && numTries <= MAX_TRIES);
-   printf("will canvel alarm\n");
-   if (numTries >= MAX_TRIES) return -1;
-   else numTries = 1; 
-   cancelAlarm();
-  
-   printf("[INFO]\n Sent frame number %d with size %d\n", link_control.framesSent, framePosition);
-   link_control.framesSent++;
-  return res;
+  printf("[INFO]\n Sent frame number %d with size %d\n", link_control.framesSent, framePosition);
+  link_control.framesSent++;
+return res;
 }
 
 
@@ -435,7 +442,6 @@ int readFrame(int fd, unsigned char* frame){
   
   while (current != STOP){
     read(fd, &byte_read, 1);
-    printf("byte: %4X\n", byte_read);
     data_currentMachine(&current, byte_read);
     frame[position++] = byte_read;
   }
