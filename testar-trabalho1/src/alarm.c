@@ -34,12 +34,12 @@ void atende()       // atende alarme
 			case SENDING_DATA:
 				printf("[TIMEOUT]\n  #%d: No response packet\n", conta);
 				conta++;
-				if(receive_id == TRUE && link_control.N_s ==1){
+				/*if(receive_id == TRUE && link_control.N_s ==1){
 					write(fd, REJ1, sizeof(REJ1));
 				}
 				else if(receive_id == TRUE && link_control.N_s ==0){
 					write(fd, REJ0, sizeof(REJ0));
-				}
+				}*/
 				break;
 			case CLOSING_CONNECTION:
 				printf("[TIMEOUT]\n  #d: No DISC received\n");

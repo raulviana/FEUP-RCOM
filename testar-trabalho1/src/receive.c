@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 
     printf("      -->RECEIVER<--\n");
 
-	receive_id = TRUE;
+	  receive_id = TRUE;
     
     link_phase = OPENING_CONNECTION;
     fd = llopen(RECEIVER);

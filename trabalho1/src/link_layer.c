@@ -347,9 +347,9 @@ int llwrite(int fd, unsigned char packet[], int packet_size){
    printf("will canvel alarm\n");
    if (numTries >= MAX_TRIES) return -1;
    else numTries = 1; 
-  cancelAlarm();
+   cancelAlarm();
   
-  printf("[INFO]\n Sent frame number %d with size %d\n", link_control.framesSent, framePosition);
+   printf("[INFO]\n Sent frame number %d with size %d\n", link_control.framesSent, framePosition);
    link_control.framesSent++;
   return res;
 }
@@ -437,7 +437,7 @@ int readFrame(int fd, unsigned char* frame){
     read(fd, &byte_read, 1);
     printf("byte: %4X\n", byte_read);
     data_currentMachine(&current, byte_read);
-  frame[position++] = byte_read;
+    frame[position++] = byte_read;
   }
   
   return position;

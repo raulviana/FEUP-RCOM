@@ -36,16 +36,7 @@ int main(int argc, char** argv)
     int fd,c, res;
     struct termios oldtio,newtio;
     bzero(&fileInfo, sizeof(fileInfo));
-
-    
-    
     unsigned char packet[MAX_FRAME_SIZE + DATA_PACKET_SIZE];
-    // if ( (argc < 2) ||
-  	//      ((strcmp("/dev/ttyS10", argv[1])!=0) &&
-  	//       (strcmp("/dev/ttyS11", argv[1])!=0) )) {
-    //   printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1\n");
-    //   exit(1);
-    // }
 
     printf("      -->RECEIVER<--\n");
 
