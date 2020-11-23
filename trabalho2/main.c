@@ -18,7 +18,7 @@
 #define MAX_STRING_LENGTH 256
 
 //gets ip address according to the host's name
-int getip(char host[])
+int getip(char host[], url* url)
 {
 	struct hostent *h;
 
@@ -28,8 +28,7 @@ int getip(char host[])
 		exit(1);
 	}
 
-    printf("\nHost name  : %s\n", h->h_name);
-    printf("IP Address : %s\n",inet_ntoa(*((struct in_addr *)h->h_addr)));
+    strcpy(url->ip_address, inet_ntoa(*((struct in_addr *)h->h_addr)));
 
 	return 0;
 }
@@ -58,8 +57,8 @@ int main(int argc, char** argv){
 	printf(" - Host: %s\n", url.host);
 	printf(" - Path: %s\n", url.url_path);
     printf(" - Filename: %s\n", url.filename);
-
-    getip(url.host);
+    getip(url.host, &url);
+    printf(" - IP: %s\n", url.ip_address);
 	
 	/*server address handling*/
 	bzero((char*)&server_addr,sizeof(server_addr));
