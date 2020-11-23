@@ -5,6 +5,8 @@ void create_url_struct(url* url) {
 	memset(url->password, 0, MAX_STRING_LENGTH);
 	memset(url->host, 0, MAX_STRING_LENGTH);
 	memset(url->url_path, 0, MAX_STRING_LENGTH);
+    memset(url->filename, 0, MAX_STRING_LENGTH);
+    memset(url->ip_address, 0, MAX_STRING_LENGTH);
 }
 
 
@@ -85,20 +87,6 @@ void parseURL(char *argument, url *url){
     
 }
 
-int getIp(url* url)
-{
-	struct hostent *h;
-    if ((h=gethostbyname(url->host)) == NULL) {  
-        herror("gethostbyname");
-        exit(1);
-    }
-
-    printf("Host name  : %s\n", h->h_name);
-    printf("IP Address : %s\n",inet_ntoa(*((struct in_addr *)h->h_addr)));
-
-    return 0;
-}
-
 void parseFilename(char *path, url *url){
     char *filename;
     char * path_to_remove;
@@ -115,5 +103,4 @@ void parseFilename(char *path, url *url){
 	}
 
     strcpy(url->filename, filename);
-    
 }

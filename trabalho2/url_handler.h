@@ -15,9 +15,9 @@ typedef struct url{
 	char host[MAX_STRING_LENGTH]; 
 	char url_path[MAX_STRING_LENGTH]; 
     char filename[MAX_STRING_LENGTH]; 
+    char ip_address[MAX_STRING_LENGTH]; 
 } url;
 
 void create_url_struct(url* url);
 void parseURL(char *argument, url *url);
-int getIp(url* url);
 void parseFilename(char *path, url *url);

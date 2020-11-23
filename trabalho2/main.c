@@ -9,13 +9,31 @@
 #include <unistd.h>
 #include <signal.h>
 #include <netdb.h>
-#include <strings.h>
+#include <string.h>
 
 #include "url_handler.h"
 
 #define SERVER_PORT 6000
 #define SERVER_ADDR "192.168.28.96"
 #define MAX_STRING_LENGTH 256
+
+//gets ip address according to the host's name
+int getip(char host[])
+{
+	struct hostent *h;
+
+	if ((h = gethostbyname(host)) == NULL)
+	{
+		herror("gethostbyname");
+		exit(1);
+	}
+
+    printf("\nHost name  : %s\n", h->h_name);
+    printf("IP Address : %s\n",inet_ntoa(*((struct in_addr *)h->h_addr)));
+
+	return 0;
+}
+
 
 
 int main(int argc, char** argv){
@@ -40,6 +58,8 @@ int main(int argc, char** argv){
 	printf(" - Host: %s\n", url.host);
 	printf(" - Path: %s\n", url.url_path);
     printf(" - Filename: %s\n", url.filename);
+
+    getip(url.host);
 	
 	/*server address handling*/
 	bzero((char*)&server_addr,sizeof(server_addr));
@@ -66,4 +86,7 @@ int main(int argc, char** argv){
 	close(sockfd);
 	exit(0);
 }
+
+
+
 
