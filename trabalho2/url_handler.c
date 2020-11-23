@@ -7,38 +7,113 @@ void create_url_struct(url* url) {
 	memset(url->url_path, 0, MAX_STRING_LENGTH);
 }
 
+
 void parseURL(char *argument, url *url){
+
+    // ftp://[<user>:<password>@]<host>/<url-path>
+
     char str[] = "ftp://";
 	char *user, *password, *host, *url_path;
-	int length = strlen(argument);
+    int length = strlen(argument);
+    bool userAndPass = false;
 
-    const char user_deli[] = ":"; 
+    for(int i = 0; i < length; i++){
+        if(argument[i] == '@'){
+            userAndPass = true;
+        }
+    }
 
-    user = strtok(&argument[6], user_deli); 
+    if(userAndPass){
+        //Get user
 
-    strcpy(url->user, user);
+        const char user_deli[] = ":"; 
 
-    const char pass_deli[] = "@"; 
+        user = strtok(&argument[6], user_deli); 
 
-    int pass_start_index = strlen(user) + 7;
+        strcpy(url->user, user);
 
-    password = strtok(&argument[pass_start_index], pass_deli); 
+        //Get password
 
-    strcpy(url->password, password);
+        const char pass_deli[] = "@"; 
 
-    const char host_deli[] = "/"; 
+        int pass_start_index = strlen(user) + 7;
 
-    int host_start_index = pass_start_index + strlen(password) + 1;
+        password = strtok(&argument[pass_start_index], pass_deli); 
 
-    host = strtok(&argument[host_start_index], host_deli); 
+        strcpy(url->password, password);
 
-    strcpy(url->host, host);
+        //Get host
 
-    const char url_deli[] = "\n"; 
+        const char host_deli[] = "/"; 
 
-    int url_start_index = host_start_index + strlen(host) + 1;
+        int host_start_index = pass_start_index + strlen(password) + 1;
 
-    url_path = strtok(&argument[url_start_index], url_deli); 
+        host = strtok(&argument[host_start_index], host_deli); 
 
-    strcpy(url->url_path, url_path);
+        strcpy(url->host, host);
+
+        //Get url-path
+
+        const char url_deli[] = "\n"; 
+
+        int url_start_index = host_start_index + strlen(host) + 1;
+
+        url_path = strtok(&argument[url_start_index], url_deli); 
+
+        strcpy(url->url_path, url_path);
+    }
+    else{
+        //Get host
+
+        const char host_deli[] = "/"; 
+
+        host = strtok(&argument[6], host_deli); 
+
+        strcpy(url->host, host);
+
+        //Get url-path
+
+        const char url_deli[] = "\n"; 
+
+        int url_start_index = strlen(host) + 7;
+
+        url_path = strtok(&argument[url_start_index], url_deli); 
+
+        strcpy(url->url_path, url_path);
+    }
+
+    
+}
+
+int getIp(url* url)
+{
+	struct hostent *h;
+    if ((h=gethostbyname(url->host)) == NULL) {  
+        herror("gethostbyname");
+        exit(1);
+    }
+
+    printf("Host name  : %s\n", h->h_name);
+    printf("IP Address : %s\n",inet_ntoa(*((struct in_addr *)h->h_addr)));
+
+    return 0;
+}
+
+void parseFilename(char *path, url *url){
+    char *filename;
+    char * path_to_remove;
+
+    strcpy(filename, path);
+
+    while (strchr(filename, '/')) {
+
+        const char path_deli[] = "/"; 
+
+        path_to_remove = strtok(&filename[0], path_deli); 
+		
+        strcpy(filename, filename + strlen(path_to_remove) + 1);
+	}
+
+    strcpy(url->filename, filename);
+    
 }

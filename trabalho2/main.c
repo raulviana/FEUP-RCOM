@@ -31,10 +31,15 @@ int main(int argc, char** argv){
 
     parseURL(argv[1], &url);
 
+    char *path = url.url_path;
+
+	parseFilename(path, &url);
+
     printf(" - Username: %s\n", url.user);
 	printf(" - Password: %s\n", url.password);
 	printf(" - Host: %s\n", url.host);
 	printf(" - Path: %s\n", url.url_path);
+    printf(" - Filename: %s\n", url.filename);
 	
 	/*server address handling*/
 	bzero((char*)&server_addr,sizeof(server_addr));
