@@ -7,7 +7,13 @@
 #include <errno.h>
 #include <stdbool.h>
 
-#define MAX_STRING_LENGTH 256
+#define MAX_STRING_LENGTH 255
+#define MAX_COMMAND_LENGTH 512
+
+#define TRUE 1
+#define FALSE 0
+
+#define FTP_PORT 21
 
 typedef struct url{
 	char user[MAX_STRING_LENGTH]; 

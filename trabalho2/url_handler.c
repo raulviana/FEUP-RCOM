@@ -77,8 +77,8 @@ void parseURL(char *argument, url *url){
 }
 
 void parseFilename(char *path, url *url){
-    char *filename;
-    char * path_to_remove;
+    char filename[MAX_STRING_LENGTH];
+    char path_to_remove[MAX_STRING_LENGTH];
 
     strcpy(filename, path);
 
@@ -86,7 +86,7 @@ void parseFilename(char *path, url *url){
 
         const char path_deli[] = "/"; 
 
-        path_to_remove = strtok(&filename[0], path_deli); 
+        strcpy(path_to_remove, strtok(&filename[0], path_deli)); 
 		
         strcpy(filename, filename + strlen(path_to_remove) + 1);
 	}
