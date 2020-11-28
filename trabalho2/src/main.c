@@ -10,11 +10,11 @@
 #include <signal.h>
 #include <netdb.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "url_handler.h"
 
-#define SERVER_PORT 6000
-#define SERVER_ADDR "192.168.28.96"
 
 /* gets ip address according to the host's name */
 int getip(char host[], url* url)
@@ -33,9 +33,12 @@ int getip(char host[], url* url)
 }
 
 int ftp_send_command(int socket_id, const char* command, int command_size, char* response);
+int ftp_retr(int socket_id, const char* command, int command_size);
 int open_socket(const char* ip_address, const int port);
 int read_socket(int socket_id, char* response);
 int ftp_passive_mode(int socket_id, char* command, size_t command_size, char* response);
+int ftp_retrieve_file(int socket_id, char* filepath, char* command, char* response);
+int ftp_download_file(int new_socket_id, char* filename);
 
 int new_socket_id;
 
@@ -113,10 +116,29 @@ int main(int argc, char** argv){
 		perror("Error in ftp_passive_mode()\n");
 		exit(5);
     }
-    printf("Entered passive mode successfully\n");
+    printf("Entered passive mode successfully\n\n");
 
-	printf("new_socket: %d\n", new_socket_id);
+	//reconstruct file path
+	char filepath[MAX_STRING_LENGTH];
+	bzero(command, MAX_COMMAND_LENGTH);
+	bzero(response, MAX_STRING_LENGTH);
+    sprintf(filepath, "%s", url.url_path);
 
+	if (ftp_retrieve_file(socket_id, filepath, command, response)) {
+        perror("ftp_retr_file()");
+        exit(6);
+    }
+
+	//download file
+	char filename[MAX_STRING_LENGTH];
+	strcpy(filename, url.filename);
+	if (ftp_download_file(new_socket_id, filename)) {
+        perror("ftp_download_file()\n");
+        exit(7);
+    }
+    printf("Downloaded file successfully\n");
+
+	close(socket_id);
 }
 
 
@@ -204,6 +226,56 @@ int ftp_passive_mode(int socket_id, char* command, size_t command_size, char* re
 		perror("open_socket()\n");
 		return 1;
 	}
+	return 0;
+}
 
+int ftp_retrieve_file(int socket_id, char* filepath, char* command, char* response){
+
+	sprintf(command, "RETR %s\r\n", filepath);
+	if (ftp_retr(socket_id, command, strlen(command))){
+		perror("ftp_command()\n");
+		return 1;
+	}
+
+	return 0;
+}
+
+int ftp_retr(int socket_id, const char* command, int command_size){
+	int res = write(socket_id, command, command_size);
+	if( res <= 0){
+		perror("Error in ftp_retr()\n");
+		return TRUE;
+	}
+	printf("Written %d bytes: %s\n", res, command);
+	
+	printf("\n");
+	return FALSE;
+}
+
+int ftp_download_file(int new_socket_id, char* filename){
+	char buffer[MAX_STRING_LENGTH];
+	int file_fd;
+	int res;
+
+	if((file_fd = open(filename, O_WRONLY | O_CREAT, 0666)) < 0) {
+		perror("open()\n");
+		return 1;
+	}
+	while ((res = read(new_socket_id, buffer, sizeof(buffer)))) {
+
+		if (res < 0) {
+			perror("read()\n");
+			return 1;
+		}
+
+		if (write(file_fd, buffer, res) < 0) {
+			perror("write()\n");
+			return 1;
+		}
+
+	}
+
+	close(file_fd);
+	close(new_socket_id);
 	return 0;
 }
