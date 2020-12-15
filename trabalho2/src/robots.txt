@@ -1,0 +1,11 @@
+
+
+# Hello Robots!
+# Welcome to CPAN.
+
+User-agent: *
+Disallow: /badrobot/
+
+User-Agent: The Knowledge AI
+Disallow: /
+

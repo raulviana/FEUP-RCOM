@@ -60,6 +60,14 @@ void parseURL(char *argument, url *url){
         strcpy(url->url_path, url_path);
 }
     else{
+
+		memset(url->user, 0 ,sizeof(url->user));
+		strcpy(url->user, "anonymous");
+
+		memset(url->password, 0 ,sizeof(url->password));
+		strcpy(url->password, "");
+
+
         //Get host
 
         const char host_deli[] = "/"; 
