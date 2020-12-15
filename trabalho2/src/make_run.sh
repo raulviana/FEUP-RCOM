@@ -1,4 +1,5 @@
 
 gcc main.c handlers.c handlers.h -o download
 
-./download ftp://ftp.up.pt/pub/CPAN/robots.txt
+./download ftp://rcom:rcom@netlab1.fe.up.pt/files/crab.mp4
+
