@@ -7,8 +7,10 @@ The first project goal was to implement a data connection protocol to transfer a
 The first project goal was to implement a data connection protocol to transfer a file over an RS-232 serial port connection.
 
 It's possible to emulate the physical serial connection between two computers using the **socat** command:
-´´´
+
+'''
 sudo socat -d -d PTY,link=/dev/ttyS10,mode=777 PTY,link=/dev/ttyS11,mode=777
-´´´
+'''
+
 Then, in different terminals, use the emitter connected to the ttyS10 port and the receiver connected to port ttyS11.
 
