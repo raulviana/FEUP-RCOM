@@ -14,4 +14,8 @@ sudo socat -d -d PTY,link=/dev/ttyS10,mode=777 PTY,link=/dev/ttyS11,mode=777
 
 Then, in different terminals, use the emitter connected to the ttyS10 port and the receiver connected to port ttyS11.
 
-## Project 2 - []
+## Project 2 - [Network Configuration]()
+
+Project 2 goals were to implement an FTP download app and to configure a computer network.
+
+The FTP download app has to connect to an FTP server and download a given file. This app is also used to validate the proper configuration of the network.
