@@ -14,3 +14,4 @@ sudo socat -d -d PTY,link=/dev/ttyS10,mode=777 PTY,link=/dev/ttyS11,mode=777
 
 Then, in different terminals, use the emitter connected to the ttyS10 port and the receiver connected to port ttyS11.
 
+## Project 2 - []
