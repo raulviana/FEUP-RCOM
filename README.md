@@ -8,9 +8,9 @@ The first project goal was to implement a data connection protocol to transfer a
 
 It's possible to emulate the physical serial connection between two computers using the **socat** command:
 
-'''
+```sh
 sudo socat -d -d PTY,link=/dev/ttyS10,mode=777 PTY,link=/dev/ttyS11,mode=777
-'''
+```
 
 Then, in different terminals, use the emitter connected to the ttyS10 port and the receiver connected to port ttyS11.
 
