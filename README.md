@@ -18,4 +18,4 @@ Then, in different terminals, use the emitter connected to the ttyS10 port and t
 
 Project 2 goals were to implement an FTP download app and to configure a computer network.
 
-The FTP download app has to connect to an FTP server and download a given file. This app is also used to validate the proper configuration of the network.
+The FTP download app has to connect to an FTP server and download a file. This app is also used to validate the proper configuration of the network.
