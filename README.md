@@ -4,8 +4,6 @@ Repository for the "Computer Networks" course [(**RCOM**)](https://sigarra.up.pt
 ## Project 1 - [Data Connection Protocol](https://github.com/raulviana/FEUP-RCOM/blob/master/trabalho1/lig_dados_desempenho.pdf)
 The first project goal was to implement a data connection protocol to transfer a file over an RS-232 serial port connection.
 
-The first project goal was to implement a data connection protocol to transfer a file over an RS-232 serial port connection.
-
 It's possible to emulate the physical serial connection between two computers using the **socat** command:
 
 ```sh
